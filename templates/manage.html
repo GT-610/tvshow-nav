@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>管理节目</title>
+  <!-- 引入 Bootstrap CSS -->
+  <link rel="stylesheet" href="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/bootstrap/5.1.3/css/bootstrap.min.css">
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .header {
+      background-color: #343a40;
+      color: #fff;
+      padding: 20px 0;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .header p {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>电视直播导航 - 管理节目</h1>
+    <p>管理您的节目条目</p>
+  </div>
+  <div class="container">
+    <!-- 添加返回主界面按钮 -->
+    <div class="d-flex justify-content-end mb-3">
+      <a href="{{ url_for('index') }}" class="btn btn-secondary">返回主界面</a>
+    </div>
+    <!-- 新增节目表单 -->
+    <div class="card mb-4">
+      <div class="card-header">新增节目</div>
+      <div class="card-body">
+        <form action="{{ url_for('add') }}" method="post">
+          <div class="mb-3">
+            <label for="name" class="form-label">节目名称</label>
+            <input type="text" name="name" id="name" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label for="url" class="form-label">节目链接</label>
+            <input type="url" name="url" id="url" class="form-control" required>
+          </div>
+          <button type="submit" class="btn btn-primary">新增</button>
+        </form>
+      </div>
+    </div>
+    <!-- 节目列表 -->
+    <div class="card">
+      <div class="card-header">节目列表</div>
+      <div class="card-body">
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for msg in messages %}
+              <div class="alert alert-info">{{ msg }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        <table class="table table-bordered table-striped">
+          <thead class="thead-dark">
+            <tr>
+              <th>ID</th>
+              <th>节目名称</th>
+              <th>节目链接</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in rows %}
+            <tr>
+              <td>{{ row['id'] }}</td>
+              <td>{{ row['name'] }}</td>
+              <td><a href="{{ row['url'] }}" target="_blank">{{ row['url'] }}</a></td>
+              <td>
+                <a href="{{ url_for('edit', id=row['id']) }}" class="btn btn-sm btn-warning">编辑</a>
+                <a href="{{ url_for('delete', id=row['id']) }}" class="btn btn-sm btn-danger" onclick="return confirm('确定删除？')">删除</a>
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="4" class="text-center">暂无节目</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <script src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/jquery/3.6.0/jquery.slim.min.js"></script>
+  <script src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

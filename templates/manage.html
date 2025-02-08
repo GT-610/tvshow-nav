@@ -76,7 +76,9 @@
               <td>{{ row['name'] }}</td>
               <td><a href="{{ row['url'] }}" target="_blank">{{ row['url'] }}</a></td>
               <td>
-                <a href="{{ url_for('edit', id=row['id']) }}" class="btn btn-sm btn-warning">编辑</a>
+                <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editModal" data-id="{{ row['id'] }}" data-name="{{ row['name'] }}" data-url="{{ row['url'] }}">
+                  编辑
+                </button>
                 <a href="{{ url_for('delete', id=row['id']) }}" class="btn btn-sm btn-danger" onclick="return confirm('确定删除？')">删除</a>
               </td>
             </tr>
@@ -93,4 +95,58 @@
   <script src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/jquery/3.6.0/jquery.slim.min.js"></script>
   <script src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
 </body>
+
+<!-- 编辑节目模态框 -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editModalLabel">编辑节目</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editForm" method="post" action="{{ url_for('edit') }}">
+          <input type="hidden" name="id" id="edit-id">
+          <div class="mb-3">
+            <label for="edit-name" class="form-label">节目名称</label>
+            <input type="text" class="form-control" id="edit-name" name="name" required>
+          </div>
+          <div class="mb-3">
+            <label for="edit-url" class="form-label">节目链接</label>
+            <input type="url" class="form-control" id="edit-url" name="url" required>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+            <button type="submit" class="btn btn-primary">保存更改</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  var editModal = document.getElementById('editModal');
+  editModal.addEventListener('show.bs.modal', function (event) {
+    // 触发事件的按钮
+    var button = event.relatedTarget;
+    // 从按钮的 data-* 属性中获取节目数据
+    var id = button.getAttribute('data-id');
+    var name = button.getAttribute('data-name');
+    var url = button.getAttribute('data-url');
+
+    // 获取模态框中的表单元素
+    var modalTitle = editModal.querySelector('.modal-title');
+    var editIdInput = editModal.querySelector('#edit-id');
+    var editNameInput = editModal.querySelector('#edit-name');
+    var editUrlInput = editModal.querySelector('#edit-url');
+
+    // 更新模态框内容
+    modalTitle.textContent = '编辑节目 - ' + name;
+    editIdInput.value = id;
+    editNameInput.value = name;
+    editUrlInput.value = url;
+  });
+</script>
+
 </html>

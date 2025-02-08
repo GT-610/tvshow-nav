@@ -50,24 +50,21 @@ def delete(id):
     flash("删除节目成功！")
     return redirect(url_for('manage'))
 
-@app.route("/edit/<int:id>", methods=['GET', 'POST'])
-def edit(id):
+@app.route("/edit/", methods=['POST'])
+def edit():
     db = get_db()
     if request.method == 'POST':
+        id = request.form['id']
         name = request.form['name']
         url_val = request.form['url']
-        db.execute('UPDATE links SET name=?, url=? WHERE id=?', (name, url_val, id))
+        cursor = db.execute('UPDATE links SET name=?, url=? WHERE id=?', (name, url_val, id))
         db.commit()
-        flash("更新节目成功！")
-        return redirect(url_for('manage'))
-    else:
-        cur = db.execute('SELECT * FROM links WHERE id=?', (id,))
-        row = cur.fetchone()
-        cur.close()
-        if row is None:
-            flash("节目不存在！")
-            return redirect(url_for('manage'))
-        return render_template("edit.html", row=row)
+        if cursor.rowcount == 0:
+            flash("节目不存在或未更新！")
+        else:
+            flash("更新节目成功！")
+    return redirect(url_for('manage'))
+
 
 if __name__ == "__main__":
     app.run()

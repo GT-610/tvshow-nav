@@ -9,8 +9,6 @@ c.execute('''
     url TEXT NOT NULL
   )
 ''')
-# 示例数据
-c.execute("INSERT INTO links (name, url) VALUES ('电视台1', 'http://example.com/live1')")
-c.execute("INSERT INTO links (name, url) VALUES ('电视台2', 'http://example.com/live2')")
+
 conn.commit()
 conn.close()

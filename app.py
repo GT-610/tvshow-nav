@@ -1,5 +1,6 @@
 import sqlite3
-from flask import Flask, render_template, g, request, redirect, url_for, flash
+from flask import Flask, send_from_directory, render_template, g, request, redirect, url_for, flash
+from flaskwebgui import FlaskUI
 
 DATABASE = 'data.db'
 app = Flask(__name__)
@@ -17,6 +18,10 @@ def close_connection(exception):
     db = getattr(g, '_database', None)
     if db is not None:
         db.close()
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(app.static_folder, 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 @app.route("/")
 def index():
@@ -67,4 +72,4 @@ def edit():
 
 
 if __name__ == "__main__":
-    app.run()
+    FlaskUI(app=app, server="flask").run()

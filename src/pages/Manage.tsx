@@ -118,11 +118,11 @@ const Manage: React.FC = () => {
   };
 
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: 2 }}>
-      <Container maxWidth="lg" sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: 0 }}>
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: 3 }}>
+      <Container maxWidth="lg" sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
         <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-            <Typography variant="h3" component="h1" gutterBottom>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+            <Typography variant="h2" component="h1" gutterBottom>
               管理电视直播节目
             </Typography>
             <Button
@@ -130,14 +130,15 @@ const Manage: React.FC = () => {
               color="primary"
               startIcon={<HomeIcon />}
               onClick={() => navigate('/')}
+              sx={{ ml: 2 }}
             >
               返回首页
             </Button>
           </Box>
 
-          <Card sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-            <CardContent sx={{ flexGrow: 1, overflow: 'auto' }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Card sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', mb: 3 }}>
+            <CardContent sx={{ flexGrow: 1, overflow: 'auto', p: 3 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
                 <Typography variant="h6" gutterBottom>
                   节目列表
                 </Typography>
@@ -146,6 +147,7 @@ const Manage: React.FC = () => {
                   color="success"
                   startIcon={<AddIcon />}
                   onClick={() => setOpenAddDialog(true)}
+                  sx={{ ml: 2 }}
                 >
                   添加节目
                 </Button>
@@ -157,27 +159,20 @@ const Manage: React.FC = () => {
                 <Typography variant="body1">暂无数据</Typography>
               ) : (
                 <TableContainer component={Paper} sx={{ maxHeight: 'calc(100vh - 250px)' }}>
-                  <Table sx={{ minWidth: 650 }} aria-label="电视直播链接表">
+                  <Table sx={{ minWidth: 650 }} aria-label="电视直播链接表" stickyHeader>
                     <TableHead>
-                      <TableRow sx={{ backgroundColor: '#343a40' }}>
-                        <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>#</TableCell>
-                        <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>名称</TableCell>
-                        <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>链接</TableCell>
-                        <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>操作</TableCell>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: 'bold' }}>#</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold' }}>名称</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold' }}>链接</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold' }}>操作</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
                       {links.map((link, index) => (
                         <TableRow
                           key={link.id}
-                          sx={{
-                            '&:nth-of-type(odd)': {
-                              backgroundColor: '#f8f9fa',
-                            },
-                            '&:hover': {
-                              backgroundColor: '#e3f2fd',
-                            },
-                          }}
+                          hover
                         >
                           <TableCell component="th" scope="row">
                             {index + 1}
@@ -188,19 +183,23 @@ const Manage: React.FC = () => {
                             <Box sx={{ display: 'flex', gap: 1 }}>
                               <IconButton
                                 color="primary"
+                                size="small"
                                 onClick={() => {
                                   setCurrentLink(link);
                                   setOpenEditDialog(true);
                                 }}
+                                aria-label="编辑"
                               >
                                 <EditIcon />
                               </IconButton>
                               <IconButton
                                 color="error"
+                                size="small"
                                 onClick={() => {
                                   setCurrentLink(link);
                                   setOpenDeleteDialog(true);
                                 }}
+                                aria-label="删除"
                               >
                                 <DeleteIcon />
                               </IconButton>
@@ -218,16 +217,17 @@ const Manage: React.FC = () => {
       </Container>
 
       {/* 添加链接对话框 */}
-      <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
+      <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)} fullWidth maxWidth="sm">
         <DialogTitle>添加新节目</DialogTitle>
-        <DialogContent>
-          <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <DialogContent sx={{ pt: 2 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             <TextField
               label="节目名称"
               variant="outlined"
               fullWidth
               value={newLink.name}
               onChange={(e) => setNewLink({ ...newLink, name: e.target.value })}
+              autoFocus
             />
             <TextField
               label="直播链接"
@@ -238,7 +238,7 @@ const Manage: React.FC = () => {
             />
           </Box>
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ p: 2, justifyContent: 'flex-end', gap: 1 }}>
           <Button onClick={() => setOpenAddDialog(false)}>取消</Button>
           <Button onClick={handleAddLink} variant="contained" color="success">
             添加
@@ -247,16 +247,17 @@ const Manage: React.FC = () => {
       </Dialog>
 
       {/* 编辑链接对话框 */}
-      <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)}>
+      <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)} fullWidth maxWidth="sm">
         <DialogTitle>编辑节目</DialogTitle>
-        <DialogContent>
-          <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <DialogContent sx={{ pt: 2 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             <TextField
               label="节目名称"
               variant="outlined"
               fullWidth
               value={currentLink.name}
               onChange={(e) => setCurrentLink({ ...currentLink, name: e.target.value })}
+              autoFocus
             />
             <TextField
               label="直播链接"
@@ -267,7 +268,7 @@ const Manage: React.FC = () => {
             />
           </Box>
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ p: 2, justifyContent: 'flex-end', gap: 1 }}>
           <Button onClick={() => setOpenEditDialog(false)}>取消</Button>
           <Button onClick={handleUpdateLink} variant="contained" color="primary">
             更新
@@ -276,14 +277,14 @@ const Manage: React.FC = () => {
       </Dialog>
 
       {/* 删除链接对话框 */}
-      <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
+      <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)} fullWidth maxWidth="sm">
         <DialogTitle>确认删除</DialogTitle>
-        <DialogContent>
-          <Typography variant="body1">
+        <DialogContent sx={{ pt: 2 }}>
+          <Typography variant="body1" sx={{ mb: 2 }}>
             确定要删除节目 "{currentLink.name}" 吗？此操作不可恢复。
           </Typography>
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ p: 2, justifyContent: 'flex-end', gap: 1 }}>
           <Button onClick={() => setOpenDeleteDialog(false)}>取消</Button>
           <Button onClick={handleDeleteLink} variant="contained" color="error">
             删除

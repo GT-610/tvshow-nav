@@ -25,11 +25,11 @@ const Home: React.FC = () => {
   }, []);
 
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: 2 }}>
-      <Container maxWidth="lg" sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: 0 }}>
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: 3 }}>
+      <Container maxWidth="lg" sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
         <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-            <Typography variant="h3" component="h1" gutterBottom>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+            <Typography variant="h2" component="h1" gutterBottom>
               电视直播导航
             </Typography>
             <Button
@@ -37,14 +37,15 @@ const Home: React.FC = () => {
               color="primary"
               startIcon={<EditIcon />}
               onClick={() => navigate('/manage')}
+              sx={{ ml: 2 }}
             >
               编辑节目
             </Button>
           </Box>
 
-          <Card sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-            <CardContent sx={{ flexGrow: 1, overflow: 'auto' }}>
-              <Typography variant="h6" gutterBottom>
+          <Card sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', mb: 3 }}>
+            <CardContent sx={{ flexGrow: 1, overflow: 'auto', p: 3 }}>
+              <Typography variant="h6" gutterBottom sx={{ mb: 3 }}>
                 轻松跳转到您喜爱的电视台直播
               </Typography>
               
@@ -54,33 +55,26 @@ const Home: React.FC = () => {
                 <Typography variant="body1">暂无数据</Typography>
               ) : (
                 <TableContainer component={Paper} sx={{ maxHeight: 'calc(100vh - 250px)' }}>
-                  <Table sx={{ minWidth: 650 }} aria-label="电视直播链接表">
+                  <Table sx={{ minWidth: 650 }} aria-label="电视直播链接表" stickyHeader>
                     <TableHead>
-                      <TableRow sx={{ backgroundColor: '#343a40' }}>
-                        <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>#</TableCell>
-                        <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>名称</TableCell>
-                        <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>链接</TableCell>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: 'bold' }}>#</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold' }}>名称</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold' }}>链接</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
                       {links.map((link, index) => (
                         <TableRow
                           key={link.id}
-                          sx={{
-                            '&:nth-of-type(odd)': {
-                              backgroundColor: '#f8f9fa',
-                            },
-                            '&:hover': {
-                              backgroundColor: '#e3f2fd',
-                            },
-                          }}
+                          hover
                         >
                           <TableCell component="th" scope="row">
                             {index + 1}
                           </TableCell>
                           <TableCell>{link.name}</TableCell>
                           <TableCell>
-                            <Link href={link.url} target="_blank" rel="noopener noreferrer">
+                            <Link href={link.url} target="_blank" rel="noopener noreferrer" underline="hover">
                               {link.url}
                             </Link>
                           </TableCell>

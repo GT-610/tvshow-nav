@@ -1,7 +1,50 @@
-# Tauri + React + Typescript
+# 电视直播导航
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
+## 项目简介
+餐桌上的 Windows 平板一直都是家人看电视用的，每次都得打开浏览器输入网址看直播，即使添加到收藏夹也很麻烦。于是就做了这样一个导航站。
 
-## Recommended IDE Setup
+起初只是给身边的人用，他们觉得都很方便，于是我决定开源，一方面供大家学习研究，另一方面也欢迎大家提出问题或建议，共同学习进步。
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+本项目基于 Tauri + Vite + React 框架，支持 Web 部署和桌面应用两种模式。
+
+## 功能
+- 展示所有已添加的电视直播链接
+- 添加、查看、编辑或删除已有的电视直播链接
+- 集成小型 SQLite 数据库来存储电视节目信息
+
+## 技术栈
+- **后端**
+  - Tauri: 构建跨平台桌面应用
+  - SQLite3: 存储电视直播链接数据
+  
+- **前端**
+  - React: 构建用户界面的 JavaScript 库
+  - Vite: 下一代前端构建工具
+  - MUI (Material-UI): React UI 组件库
+  - HTML5, CSS3, JavaScript: 网页基础技术
+
+## 安装与运行
+1. **安装依赖**
+
+   ```bash
+   npm install
+   ```
+
+2. **启动桌面应用开发模式**
+    ```bash
+    npm run tauri dev
+    ```
+
+3. **构建桌面应用**
+    ```bash
+    npm run tauri build
+    ```
+
+## 注意事项
+- 该项目本来为自用用途，**未做足够的安全性考查**，**不建议直接用于生产环境**。本人也**不为该项目负任何责任**。
+
+## 贡献
+如果有任何问题或建议，请提交 Issues 或 PR。
+
+## 许可证
+源代码：Apache License 2.0。详见 [LICENSE](LICENSE)。

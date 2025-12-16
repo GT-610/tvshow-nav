@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import Box from '@mui/material/Box';
 import Home from './pages/Home';
 import Manage from './pages/Manage';
 import './App.css';
@@ -28,12 +29,14 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Router>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/manage" element={<Manage />} />
-        </Routes>
-      </Router>
+      <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <Router>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/manage" element={<Manage />} />
+          </Routes>
+        </Router>
+      </Box>
     </ThemeProvider>
   );
 }

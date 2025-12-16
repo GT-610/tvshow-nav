@@ -1,6 +1,6 @@
 [package]
 name = "tvshow-nav"
-version = "0.1.1"
+version = "0.2.0"
 description = "Nav page for redirecting to TV channels."
 authors = ["GT610"]
 edition = "2021"

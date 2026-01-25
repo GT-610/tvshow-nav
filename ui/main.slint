@@ -1,4 +1,4 @@
-import { Button, LineEdit, ListView, StandardButton, HorizontalBox, VerticalBox } from "std-widgets.slint";
+import { Button, LineEdit, ListView, StandardTableView, HorizontalBox, VerticalBox } from "std-widgets.slint";
 
 struct LinkItem {
     id: int,
@@ -18,8 +18,8 @@ export component MainWindow inherits Window {
     in-out property <string> message_text: "";
     in-out property <string> message_type: "success";
 
-    preferred-width: 900px;
-    preferred-height: 700px;
+    width: 900px;
+    height: 700px;
     title: "电视直播导航";
 
     callback add_link();
@@ -37,8 +37,8 @@ export component MainWindow inherits Window {
     }
 
     Rectangle {
-        width: parent.width;
-        height: parent.height;
+        width: 100%;
+        height: 100%;
 
         VerticalBox {
             padding: 20px;
@@ -71,34 +71,55 @@ export component MainWindow inherits Window {
             }
 
             if (!root.is_manage_page) : VerticalBox {
+                spacing: 10px;
+
                 Text {
                     text: "轻松跳转到您喜爱的电视台直播";
                     font-size: 14px;
+                    color: #666;
                 }
 
-                ListView {
-                    for link in root.links: HorizontalLayout {
-                        spacing: 10px;
+                Rectangle {
+                    border-radius: 8px;
+                    background: #f5f5f5;
 
-                        Text {
-                            text: link.id;
-                            vertical-alignment: center;
-                        }
+                    ListView {
+                        for link in root.links: HorizontalLayout {
+                            spacing: 10px;
 
-                        Text {
-                            text: link.name;
-                            vertical-alignment: center;
-                        }
+                            Rectangle {
+                                width: 30px;
+                                height: 30px;
+                                border-radius: 15px;
+                                background: #2196f3;
 
-                        Text {
-                            text: link.url;
-                            color: blue;
-                            vertical-alignment: center;
-                        }
+                                Text {
+                                    text: link.id;
+                                    color: white;
+                                    font-size: 12px;
+                                    horizontal-alignment: center;
+                                    vertical-alignment: center;
+                                }
+                            }
 
-                        TouchArea {
-                            clicked => {
-                                root.open_link(link.url);
+                            Text {
+                                text: link.name;
+                                font-size: 14px;
+                                font-weight: 500;
+                                vertical-alignment: center;
+                            }
+
+                            Text {
+                                text: link.url;
+                                color: #2196f3;
+                                font-size: 12px;
+                                vertical-alignment: center;
+                            }
+
+                            TouchArea {
+                                clicked => {
+                                    root.open_link(link.url);
+                                }
                             }
                         }
                     }
@@ -106,6 +127,8 @@ export component MainWindow inherits Window {
             }
 
             if (root.is_manage_page) : VerticalBox {
+                spacing: 10px;
+
                 HorizontalBox {
                     Text {
                         text: "节目列表";
@@ -128,43 +151,21 @@ export component MainWindow inherits Window {
                     }
                 }
 
-                ListView {
-                    for link in root.links: HorizontalLayout {
-                        spacing: 10px;
+                StandardTableView {
+                    width: 100%;
+                    height: 100%;
+                    columns: [
+                        { title: "编号", width: 60px },
+                        { title: "节目名称" },
+                        { title: "直播链接" }
+                    ];
+                    rows: [];
 
-                        Text {
-                            text: link.id;
-                            vertical-alignment: center;
-                        }
-
-                        Text {
-                            text: link.name;
-                            vertical-alignment: center;
-                        }
-
-                        Text {
-                            text: link.url;
-                            vertical-alignment: center;
-                        }
-
-                        Button {
-                            text: "编辑";
-                            clicked => {
-                                root.edit_id = link.id;
-                                root.edit_name = link.name;
-                                root.edit_url = link.url;
-                                root.show_edit_dialog = true;
-                            }
-                        }
-
-                        Button {
-                            text: "删除";
-                            clicked => {
-                                root.edit_id = link.id;
-                                root.edit_name = link.name;
-                                root.show_delete_dialog = true;
-                            }
-                        }
+                    row-pointer-event(row, col, event) => {
+                        root.edit_id = root.links[row].id;
+                        root.edit_name = root.links[row].name;
+                        root.edit_url = root.links[row].url;
+                        root.show_edit_dialog = true;
                     }
                 }
             }
@@ -173,6 +174,7 @@ export component MainWindow inherits Window {
                 background: root.message_type == "success" ? #4caf50 : #f44336;
                 width: 100%;
                 height: 40px;
+                border-radius: 8px;
 
                 Text {
                     text: root.message_text;
@@ -196,9 +198,10 @@ export component MainWindow inherits Window {
 
             Rectangle {
                 width: 400px;
-                height: 250px;
+                height: 280px;
                 x: (parent.width - self.width) / 2;
                 y: (parent.height - self.height) / 2;
+                border-radius: 16px;
 
                 VerticalBox {
                     padding: 20px;
@@ -207,30 +210,35 @@ export component MainWindow inherits Window {
                     Text {
                         text: "添加新节目";
                         font-size: 20px;
+                        font-weight: 600;
                     }
 
                     LineEdit {
                         text <=> root.edit_name;
-                        placeholder-text: "节目名称";
+                        placeholder-text: "请输入节目名称";
+                        height: 40px;
                     }
 
                     LineEdit {
                         text <=> root.edit_url;
-                        placeholder-text: "直播链接";
+                        placeholder-text: "请输入直播链接";
+                        height: 40px;
                     }
 
                     HorizontalBox {
-                        StandardButton {
-                            kind: cancel;
-                            clicked => {
-                                root.show_add_dialog = false;
-                            }
-                        }
+                        spacing: 10px;
 
                         Button {
                             text: "添加";
                             clicked => {
                                 root.add_link();
+                            }
+                        }
+
+                        Button {
+                            text: "取消";
+                            clicked => {
+                                root.show_add_dialog = false;
                             }
                         }
                     }
@@ -245,9 +253,10 @@ export component MainWindow inherits Window {
 
             Rectangle {
                 width: 400px;
-                height: 250px;
+                height: 280px;
                 x: (parent.width - self.width) / 2;
                 y: (parent.height - self.height) / 2;
+                border-radius: 16px;
 
                 VerticalBox {
                     padding: 20px;
@@ -256,30 +265,35 @@ export component MainWindow inherits Window {
                     Text {
                         text: "编辑节目";
                         font-size: 20px;
+                        font-weight: 600;
                     }
 
                     LineEdit {
                         text <=> root.edit_name;
-                        placeholder-text: "节目名称";
+                        placeholder-text: "请输入节目名称";
+                        height: 40px;
                     }
 
                     LineEdit {
                         text <=> root.edit_url;
-                        placeholder-text: "直播链接";
+                        placeholder-text: "请输入直播链接";
+                        height: 40px;
                     }
 
                     HorizontalBox {
-                        StandardButton {
-                            kind: cancel;
-                            clicked => {
-                                root.show_edit_dialog = false;
-                            }
-                        }
+                        spacing: 10px;
 
                         Button {
                             text: "更新";
                             clicked => {
                                 root.update_link(root.edit_id, root.edit_name, root.edit_url);
+                            }
+                        }
+
+                        Button {
+                            text: "取消";
+                            clicked => {
+                                root.show_edit_dialog = false;
                             }
                         }
                     }
@@ -294,9 +308,10 @@ export component MainWindow inherits Window {
 
             Rectangle {
                 width: 400px;
-                height: 180px;
+                height: 200px;
                 x: (parent.width - self.width) / 2;
                 y: (parent.height - self.height) / 2;
+                border-radius: 16px;
 
                 VerticalBox {
                     padding: 20px;
@@ -305,24 +320,28 @@ export component MainWindow inherits Window {
                     Text {
                         text: "确认删除";
                         font-size: 20px;
+                        font-weight: 600;
                     }
 
                     Text {
                         text: "确定要删除节目 " + root.edit_name + " 吗？此操作不可恢复。";
+                        wrap: word-wrap;
                     }
 
                     HorizontalBox {
-                        StandardButton {
-                            kind: cancel;
+                        spacing: 10px;
+
+                        Button {
+                            text: "确定";
                             clicked => {
-                                root.show_delete_dialog = false;
+                                root.delete_link(root.edit_id);
                             }
                         }
 
-                        StandardButton {
-                            kind: yes;
+                        Button {
+                            text: "取消";
                             clicked => {
-                                root.delete_link(root.edit_id);
+                                root.show_delete_dialog = false;
                             }
                         }
                     }

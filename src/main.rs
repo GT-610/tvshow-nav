@@ -4,7 +4,7 @@ use std::cell::RefCell;
 use std::path::Path;
 use std::process::Command;
 use std::rc::Rc;
-use slint::{VecModel, Model, SharedString};
+use slint::{Model, SharedString, VecModel};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Link {
@@ -116,7 +116,7 @@ fn open_url(url: &str) {
     }
 }
 
-slint::include_modules!();
+slint::slint!(export { MainWindow } from "ui/main.slint";);
 
 fn main() {
     let main_window = MainWindow::new().unwrap();

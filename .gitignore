@@ -15,8 +15,8 @@ dist
 dist-ssr
 *.local
 
-# Tauri outputs
-tauri.target
+# Cargo outputs
+target
 
 # Database files
 *.db

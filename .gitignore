@@ -23,7 +23,8 @@ tauri.target
 *.sqlite
 
 # Editor directories and files
-.vscode/*
+.vscode
+.trae
 !.vscode/extensions.json
 .idea
 .DS_Store

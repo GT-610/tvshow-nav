@@ -1,40 +1,56 @@
-# Logs
-logs
+# Miscellaneous
+*.class
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
 
-# Dependencies
-node_modules
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
 
-# Build outputs
-dist
-dist-ssr
-*.local
+# Visual Studio Code related
+.vscode/
+!.vscode/extensions.json
 
-# Cargo outputs
-target
+# Flutter/Dart/Pub related
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+
+# Web related
+lib/generated_plugin_registrant.dart
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio/Gradle related
+android/local.properties
+*.iml
+android/.gradle
+android/captures/
+android/gradlew
+android/gradlew.bat
+android/key.properties
+android/.idea/
+
+# ios related
+ios/Flutter/.last_build_id
+ios/Flutter/flutter_export_environment.sh
 
 # Database files
 *.db
 *.sqlite
-
-# Editor directories and files
-.vscode
-.trae
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
-# Environment variables
-.env
-.env.local
-.env.*.local

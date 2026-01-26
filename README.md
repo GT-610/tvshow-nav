@@ -3,43 +3,29 @@
 ## 项目简介
 餐桌上的 Windows 平板一直都是家人看电视用的，每次都得打开浏览器输入网址看直播，即使添加到收藏夹也很麻烦。于是就做了这样一个导航站。
 
-起初只是给身边的人用，他们觉得都很方便，于是我决定开源，一方面供大家学习研究，另一方面也欢迎大家提出问题或建议，共同学习进步。
-
-本项目基于 Tauri + Vite + React 框架，支持 Web 部署和桌面应用两种模式。
+本项目基于 Flutter + Fluent UI 框架开发，专为 Windows 桌面优化。
 
 ## 功能
 - 展示所有已添加的电视直播链接
 - 添加、查看、编辑或删除已有的电视直播链接
-- 集成小型 SQLite 数据库来存储电视节目信息
+- 集成 SQLite 数据库存储电视直播信息
+- 原生 Windows 界面风格
 
 ## 技术栈
-- **后端**
-  - Tauri: 构建跨平台桌面应用
-  - SQLite3: 存储电视直播链接数据
-  
-- **前端**
-  - React: 构建用户界面的 JavaScript 库
-  - Vite: 下一代前端构建工具
-  - MUI (Material-UI): React UI 组件库
-  - HTML5, CSS3, JavaScript: 网页基础技术
+- **框架**: Flutter 桌面应用
+- **UI**: Fluent UI (Windows 原生风格)
+- **数据库**: SQLite (sqflite)
+- **平台**: Windows 10/11
 
-## 安装与运行
-1. **安装依赖**
+## 运行方式
+```bash
+flutter run -d windows
+```
 
-   ```bash
-   npm install
-   ```
-
-2. **启动桌面应用开发模式**
-    ```bash
-    npm run tauri dev
-    ```
-
-3. **构建桌面应用**
-    ```bash
-    npm run tauri build
-    ```
-
+## 构建发布版本
+```bash
+flutter build windows
+```
 ## 注意事项
 - 该项目本来为自用用途，**未做足够的安全性考查**，**不建议直接用于生产环境**。本人也**不为该项目负任何责任**。
 

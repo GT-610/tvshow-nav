@@ -1,4 +1,4 @@
-import { Button, LineEdit, ListView, StandardTableView, HorizontalBox, VerticalBox } from "std-widgets.slint";
+import { Button, LineEdit, ListView, HorizontalBox, VerticalBox } from "std-widgets.slint";
 
 struct LinkItem {
     id: int,
@@ -27,6 +27,8 @@ export component MainWindow inherits Window {
     callback delete_link(int);
     callback show_message(string, string);
     callback open_link(string);
+    callback edit_link(int);
+    callback remove_link(int);
 
     public function navigate-to-manage() {
         self.is_manage_page = true;
@@ -48,7 +50,6 @@ export component MainWindow inherits Window {
                 Text {
                     text: "电视直播导航";
                     font-size: 24px;
-                    vertical-alignment: center;
                 }
 
                 HorizontalLayout {
@@ -79,46 +80,46 @@ export component MainWindow inherits Window {
                     color: #666;
                 }
 
-                Rectangle {
-                    border-radius: 8px;
-                    background: #f5f5f5;
+                ListView {
+                    width: 100%;
+                    height: 100%;
 
-                    ListView {
-                        for link in root.links: HorizontalLayout {
-                            spacing: 10px;
+                    for link in root.links: HorizontalLayout {
+                        spacing: 10px;
+                        padding: 8px;
 
-                            Rectangle {
-                                width: 30px;
-                                height: 30px;
-                                border-radius: 15px;
-                                background: #2196f3;
+                        Text {
+                            text: link.id;
+                            width: 50px;
+                            horizontal-alignment: center;
+                        }
 
-                                Text {
-                                    text: link.id;
-                                    color: white;
-                                    font-size: 12px;
-                                    horizontal-alignment: center;
-                                    vertical-alignment: center;
+                        Text {
+                            text: link.name;
+                            horizontal-alignment: center;
+                        }
+
+                        Text {
+                            text: link.url;
+                            color: #666;
+                            horizontal-alignment: center;
+                        }
+
+                        HorizontalLayout {
+                            spacing: 5px;
+                            width: 120px;
+
+                            Button {
+                                text: "编辑";
+                                clicked => {
+                                    root.edit_link(link.id);
                                 }
                             }
 
-                            Text {
-                                text: link.name;
-                                font-size: 14px;
-                                font-weight: 500;
-                                vertical-alignment: center;
-                            }
-
-                            Text {
-                                text: link.url;
-                                color: #2196f3;
-                                font-size: 12px;
-                                vertical-alignment: center;
-                            }
-
-                            TouchArea {
+                            Button {
+                                text: "删除";
                                 clicked => {
-                                    root.open_link(link.url);
+                                    root.remove_link(link.id);
                                 }
                             }
                         }
@@ -133,7 +134,6 @@ export component MainWindow inherits Window {
                     Text {
                         text: "节目列表";
                         font-size: 18px;
-                        vertical-alignment: center;
                     }
 
                     HorizontalLayout {
@@ -151,21 +151,84 @@ export component MainWindow inherits Window {
                     }
                 }
 
-                StandardTableView {
+                VerticalBox {
                     width: 100%;
                     height: 100%;
-                    columns: [
-                        { title: "编号", width: 60px },
-                        { title: "节目名称" },
-                        { title: "直播链接" }
-                    ];
-                    rows: [];
 
-                    row-pointer-event(row, col, event) => {
-                        root.edit_id = root.links[row].id;
-                        root.edit_name = root.links[row].name;
-                        root.edit_url = root.links[row].url;
-                        root.show_edit_dialog = true;
+                    HorizontalLayout {
+                        padding: 8px;
+                        spacing: 5px;
+
+                        Text {
+                            text: "编号";
+                            width: 50px;
+                            horizontal-alignment: center;
+                        }
+
+                        Text {
+                            text: "节目名称";
+                            horizontal-alignment: center;
+                        }
+
+                        Text {
+                            text: "直播链接";
+                            horizontal-alignment: center;
+                        }
+
+                        HorizontalLayout {
+                            width: 120px;
+
+                            Text {
+                                text: "操作";
+                                horizontal-alignment: center;
+                            }
+                        }
+                    }
+
+                    ListView {
+                        width: 100%;
+                        height: 100%;
+
+                        for link in root.links: HorizontalLayout {
+                            padding: 8px;
+                            spacing: 5px;
+
+                            Text {
+                                text: link.id;
+                                width: 50px;
+                                horizontal-alignment: center;
+                            }
+
+                            Text {
+                                text: link.name;
+                                horizontal-alignment: center;
+                            }
+
+                            Text {
+                                text: link.url;
+                                color: #666;
+                                horizontal-alignment: center;
+                            }
+
+                            HorizontalLayout {
+                                spacing: 5px;
+                                width: 120px;
+
+                                Button {
+                                    text: "编辑";
+                                    clicked => {
+                                        root.edit_link(link.id);
+                                    }
+                                }
+
+                                Button {
+                                    text: "删除";
+                                    clicked => {
+                                        root.remove_link(link.id);
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }

@@ -129,13 +129,15 @@ fn main() {
             let links = get_links().unwrap_or_default();
             let model = links_model.borrow_mut();
             model.clear();
+            
             for link in links {
                 model.push(LinkItem {
                     id: link.id,
-                    name: SharedString::from(link.name),
-                    url: SharedString::from(link.url),
+                    name: SharedString::from(link.name.clone()),
+                    url: SharedString::from(link.url.clone()),
                 });
             }
+            
             let model_copy: Vec<LinkItem> = model.iter().collect();
             let model_rc = Rc::new(VecModel::from(model_copy));
             window.set_links(model_rc.into());
@@ -236,6 +238,39 @@ fn main() {
         main_window.on_open_link(move |url| {
             let url_str = url.to_string();
             open_url(&url_str);
+        });
+    }
+
+    {
+        let weak_window = main_window.as_weak();
+        main_window.on_edit_link(move |id| {
+            let window = weak_window.unwrap();
+            let links = get_links().unwrap_or_default();
+            for link in links {
+                if link.id == id {
+                    window.set_edit_id(link.id);
+                    window.set_edit_name(SharedString::from(link.name));
+                    window.set_edit_url(SharedString::from(link.url));
+                    window.set_show_edit_dialog(true);
+                    break;
+                }
+            }
+        });
+    }
+
+    {
+        let weak_window = main_window.as_weak();
+        main_window.on_remove_link(move |id| {
+            let window = weak_window.unwrap();
+            let links = get_links().unwrap_or_default();
+            for link in links {
+                if link.id == id {
+                    window.set_edit_id(link.id);
+                    window.set_edit_name(SharedString::from(link.name));
+                    break;
+                }
+            }
+            window.set_show_delete_dialog(true);
         });
     }
 

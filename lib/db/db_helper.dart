@@ -43,6 +43,9 @@ class DbHelper {
     await _initDatabaseFactory();
     if (_database != null) return _database!;
     final path = getDbPath();
+    if (!await File(path).exists()) {
+      await initDatabase();
+    }
     _database = await openDatabase(
       path,
       version: 1,

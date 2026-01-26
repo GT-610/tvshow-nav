@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:tvshow_nav/db/db_helper.dart';
 import 'package:tvshow_nav/models/link.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -17,6 +18,17 @@ class MyApp extends StatelessWidget {
       title: '电视直播导航',
       theme: FluentThemeData(brightness: Brightness.light),
       darkTheme: FluentThemeData(brightness: Brightness.dark),
+      locale: const Locale('zh', 'CN'),
+      supportedLocales: const [
+        Locale('zh', 'CN'),
+        Locale('zh'),
+        Locale('en'),
+      ],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       home: const MainPage(),
     );
   }
@@ -52,6 +64,10 @@ class _MainPageState extends State<MainPage> {
     final dbPath = DbHelper.instance.getDbPath();
     final exists = await File(dbPath).exists();
     if (exists) {
+      if (!mounted) return;
+      setState(() {
+        _dbInitialized = true;
+      });
       await _loadLinks();
     } else {
       if (!mounted) return;

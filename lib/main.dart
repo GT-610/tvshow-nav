@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:tvshow_nav/db/db_helper.dart';
 import 'package:tvshow_nav/models/link.dart';
@@ -30,6 +31,7 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   bool _isManagePage = false;
+  bool _dbInitialized = false;
   List<TvLink> _links = [];
 
   int _editId = 0;
@@ -43,7 +45,29 @@ class _MainPageState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
-    _loadLinks();
+    _checkAndInitDatabase();
+  }
+
+  Future<void> _checkAndInitDatabase() async {
+    final dbPath = DbHelper.instance.getDbPath();
+    final exists = await File(dbPath).exists();
+    if (exists) {
+      await _loadLinks();
+    } else {
+      if (!mounted) return;
+      setState(() {
+        _dbInitialized = false;
+      });
+    }
+  }
+
+  Future<void> _initDatabase() async {
+    await DbHelper.instance.initDatabase();
+    if (!mounted) return;
+    setState(() {
+      _dbInitialized = true;
+    });
+    await _loadLinks();
   }
 
   Future<void> _loadLinks() async {
@@ -218,6 +242,22 @@ class _MainPageState extends State<MainPage> {
   }
 
   Widget _buildHomePage() {
+    if (!_dbInitialized) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('数据库尚未初始化'),
+            const SizedBox(height: 20),
+            FilledButton(
+              onPressed: _initDatabase,
+              child: const Text('初始化数据库'),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -264,6 +304,22 @@ class _MainPageState extends State<MainPage> {
   }
 
   Widget _buildManagePage() {
+    if (!_dbInitialized) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('数据库尚未初始化'),
+            const SizedBox(height: 20),
+            FilledButton(
+              onPressed: _initDatabase,
+              child: const Text('初始化数据库'),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

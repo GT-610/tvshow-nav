@@ -157,6 +157,7 @@ fn main() {
             if name.trim().is_empty() || url.trim().is_empty() {
                 window.set_message_text(SharedString::from("名称和链接不能为空"));
                 window.set_message_type(SharedString::from("error"));
+                window.set_show_message_timer(true);
                 return;
             }
 
@@ -166,10 +167,12 @@ fn main() {
                     window.set_show_add_dialog(false);
                     window.set_message_text(SharedString::from("新增节目成功！"));
                     window.set_message_type(SharedString::from("success"));
+                    window.set_show_message_timer(true);
                 }
                 Err(e) => {
                     window.set_message_text(SharedString::from(format!("新增节目失败: {}", e)));
                     window.set_message_type(SharedString::from("error"));
+                    window.set_show_message_timer(true);
                 }
             }
         });
@@ -186,6 +189,7 @@ fn main() {
             if name_str.trim().is_empty() || url_str.trim().is_empty() {
                 window.set_message_text(SharedString::from("名称和链接不能为空"));
                 window.set_message_type(SharedString::from("error"));
+                window.set_show_message_timer(true);
                 return;
             }
 
@@ -195,10 +199,12 @@ fn main() {
                     window.set_show_edit_dialog(false);
                     window.set_message_text(SharedString::from("更新节目成功！"));
                     window.set_message_type(SharedString::from("success"));
+                    window.set_show_message_timer(true);
                 }
                 Err(e) => {
                     window.set_message_text(SharedString::from(format!("更新节目失败: {}", e)));
                     window.set_message_type(SharedString::from("error"));
+                    window.set_show_message_timer(true);
                 }
             }
         });
@@ -216,10 +222,12 @@ fn main() {
                     window.set_show_delete_dialog(false);
                     window.set_message_text(SharedString::from("删除节目成功！"));
                     window.set_message_type(SharedString::from("success"));
+                    window.set_show_message_timer(true);
                 }
                 Err(e) => {
                     window.set_message_text(SharedString::from(format!("删除节目失败: {}", e)));
                     window.set_message_type(SharedString::from("error"));
+                    window.set_show_message_timer(true);
                 }
             }
         });
@@ -231,6 +239,7 @@ fn main() {
             let window = weak_window.unwrap();
             window.set_message_text(text);
             window.set_message_type(type_);
+            window.set_show_message_timer(true);
         });
     }
 

@@ -17,6 +17,7 @@ export component MainWindow inherits Window {
     in-out property <bool> show_delete_dialog: false;
     in-out property <string> message_text: "";
     in-out property <string> message_type: "success";
+    in-out property <bool> show_message_timer: false;
 
     min-width: 600px;
     min-height: 500px;
@@ -185,13 +186,13 @@ export component MainWindow inherits Window {
 
                         Text {
                             text: "节目名称";
-                            width: 38%;
+                            width: 35%;
                             horizontal-alignment: center;
                         }
 
                         Text {
                             text: "直播链接";
-                            width: 35%;
+                            width: 38%;
                             horizontal-alignment: center;
                         }
 
@@ -221,12 +222,12 @@ export component MainWindow inherits Window {
 
                             Text {
                                 text: link.name;
-                                width: 38%;
+                                width: 35%;
                                 horizontal-alignment: center;
                             }
 
                             TouchArea {
-                                width: 35%;
+                                width: 38%;
                                 clicked => {
                                     root.open_link(link.url);
                                 }
@@ -280,161 +281,119 @@ export component MainWindow inherits Window {
                         root.message_text = "";
                     }
                 }
+
+                Timer {
+                    interval: 3000ms;
+                    running: root.show_message_timer;
+                    triggered => {
+                        root.message_text = "";
+                        root.show_message_timer = false;
+                    }
+                }
             }
         }
 
-        if (root.show_add_dialog) : Rectangle {
-            background: rgba(0, 0, 0, 0.5);
-            width: parent.width;
-            height: parent.height;
+        if (root.show_add_dialog) : Dialog {
+            title: "添加新节目";
 
-            Rectangle {
-                width: 400px;
-                height: 280px;
-                x: (parent.width - self.width) / 2;
-                y: (parent.height - self.height) / 2;
-                border-radius: 16px;
+            VerticalBox {
+                spacing: 15px;
 
-                VerticalBox {
-                    padding: 20px;
-                    spacing: 15px;
+                LineEdit {
+                    text <=> root.edit_name;
+                    placeholder-text: "请输入节目名称";
+                    height: 40px;
+                }
 
-                    Text {
-                        text: "添加新节目";
-                        font-size: 20px;
-                        font-weight: 600;
-                    }
+                LineEdit {
+                    text <=> root.edit_url;
+                    placeholder-text: "请输入直播链接";
+                    height: 40px;
+                }
 
-                    LineEdit {
-                        text <=> root.edit_name;
-                        placeholder-text: "请输入节目名称";
-                        height: 40px;
-                    }
+                HorizontalBox {
+                    spacing: 10px;
 
-                    LineEdit {
-                        text <=> root.edit_url;
-                        placeholder-text: "请输入直播链接";
-                        height: 40px;
-                    }
-
-                    HorizontalBox {
-                        spacing: 10px;
-
-                        Button {
-                            text: "添加";
-                            clicked => {
-                                root.add_link();
-                            }
+                    Button {
+                        text: "添加";
+                        clicked => {
+                            root.add_link();
                         }
+                    }
 
-                        Button {
-                            text: "取消";
-                            clicked => {
-                                root.show_add_dialog = false;
-                            }
+                    Button {
+                        text: "取消";
+                        clicked => {
+                            root.show_add_dialog = false;
                         }
                     }
                 }
             }
         }
 
-        if (root.show_edit_dialog) : Rectangle {
-            background: rgba(0, 0, 0, 0.5);
-            width: parent.width;
-            height: parent.height;
+        if (root.show_edit_dialog) : Dialog {
+            title: "编辑节目";
 
-            Rectangle {
-                width: 400px;
-                height: 280px;
-                x: (parent.width - self.width) / 2;
-                y: (parent.height - self.height) / 2;
-                border-radius: 16px;
+            VerticalBox {
+                spacing: 15px;
 
-                VerticalBox {
-                    padding: 20px;
-                    spacing: 15px;
+                LineEdit {
+                    text <=> root.edit_name;
+                    placeholder-text: "请输入节目名称";
+                    height: 40px;
+                }
 
-                    Text {
-                        text: "编辑节目";
-                        font-size: 20px;
-                        font-weight: 600;
-                    }
+                LineEdit {
+                    text <=> root.edit_url;
+                    placeholder-text: "请输入直播链接";
+                    height: 40px;
+                }
 
-                    LineEdit {
-                        text <=> root.edit_name;
-                        placeholder-text: "请输入节目名称";
-                        height: 40px;
-                    }
+                HorizontalBox {
+                    spacing: 10px;
 
-                    LineEdit {
-                        text <=> root.edit_url;
-                        placeholder-text: "请输入直播链接";
-                        height: 40px;
-                    }
-
-                    HorizontalBox {
-                        spacing: 10px;
-
-                        Button {
-                            text: "更新";
-                            clicked => {
-                                root.update_link(root.edit_id, root.edit_name, root.edit_url);
-                            }
+                    Button {
+                        text: "更新";
+                        clicked => {
+                            root.update_link(root.edit_id, root.edit_name, root.edit_url);
                         }
+                    }
 
-                        Button {
-                            text: "取消";
-                            clicked => {
-                                root.show_edit_dialog = false;
-                            }
+                    Button {
+                        text: "取消";
+                        clicked => {
+                            root.show_edit_dialog = false;
                         }
                     }
                 }
             }
         }
 
-        if (root.show_delete_dialog) : Rectangle {
-            background: rgba(0, 0, 0, 0.5);
-            width: parent.width;
-            height: parent.height;
+        if (root.show_delete_dialog) : Dialog {
+            title: "确认删除";
 
-            Rectangle {
-                width: 400px;
-                height: 200px;
-                x: (parent.width - self.width) / 2;
-                y: (parent.height - self.height) / 2;
-                border-radius: 16px;
+            VerticalBox {
+                spacing: 15px;
 
-                VerticalBox {
-                    padding: 20px;
-                    spacing: 15px;
+                Text {
+                    text: "确定要删除节目 " + root.edit_name + " 吗？此操作不可恢复。";
+                    wrap: word-wrap;
+                }
 
-                    Text {
-                        text: "确认删除";
-                        font-size: 20px;
-                        font-weight: 600;
-                    }
+                HorizontalBox {
+                    spacing: 10px;
 
-                    Text {
-                        text: "确定要删除节目 " + root.edit_name + " 吗？此操作不可恢复。";
-                        wrap: word-wrap;
-                    }
-
-                    HorizontalBox {
-                        spacing: 10px;
-
-                        Button {
-                            text: "确定";
-                            clicked => {
-                                root.delete_link(root.edit_id);
-                            }
+                    Button {
+                        text: "确定";
+                        clicked => {
+                            root.delete_link(root.edit_id);
                         }
+                    }
 
-                        Button {
-                            text: "取消";
-                            clicked => {
-                                root.show_delete_dialog = false;
-                            }
+                    Button {
+                        text: "取消";
+                        clicked => {
+                            root.show_delete_dialog = false;
                         }
                     }
                 }

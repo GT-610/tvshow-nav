@@ -21,8 +21,6 @@ class MyApp extends StatelessWidget {
       locale: const Locale('zh', 'CN'),
       supportedLocales: const [
         Locale('zh', 'CN'),
-        Locale('zh'),
-        Locale('en'),
       ],
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
@@ -50,9 +48,7 @@ class _MainPageState extends State<MainPage> {
   String _editName = '';
   String _editUrl = '';
 
-  static const Color linkColor = Color(0xFF0078D4);
-  static const Color greyColor = Color(0x33AAAAAA);
-  static const Color redColor = Color(0xFFFF0000);
+  static const Color accentColor = Color(0xFF0078D4);
 
   @override
   void initState() {
@@ -151,6 +147,7 @@ class _MainPageState extends State<MainPage> {
         ],
         content: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             InfoLabel(
               label: '节目名称',
@@ -159,7 +156,7 @@ class _MainPageState extends State<MainPage> {
                 onChanged: (value) => setState(() => _editName = value),
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
             InfoLabel(
               label: '直播链接',
               child: TextBox(
@@ -194,6 +191,7 @@ class _MainPageState extends State<MainPage> {
         ],
         content: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             InfoLabel(
               label: '节目名称',
@@ -206,7 +204,7 @@ class _MainPageState extends State<MainPage> {
                 onChanged: (value) => setState(() => _editName = value),
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
             InfoLabel(
               label: '直播链接',
               child: TextBox(
@@ -240,7 +238,7 @@ class _MainPageState extends State<MainPage> {
           FilledButton(
             onPressed: _deleteLink,
             style: const ButtonStyle(
-              backgroundColor: WidgetStatePropertyAll(redColor),
+              backgroundColor: WidgetStatePropertyAll(Color(0xFFFF0000)),
             ),
             child: const Text('删除'),
           ),
@@ -257,154 +255,218 @@ class _MainPageState extends State<MainPage> {
     _editUrl = '';
   }
 
-  Widget _buildHomePage() {
-    if (!_dbInitialized) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('数据库尚未初始化'),
-            const SizedBox(height: 20),
-            FilledButton(
-              onPressed: _initDatabase,
-              child: const Text('初始化数据库'),
+  Widget _buildUninitializedView() {
+    final isDark = FluentTheme.of(context).brightness == Brightness.dark;
+    return Center(
+      child: Card(
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                FluentIcons.database,
+                size: 48,
+                color: isDark ? Colors.white : Colors.black,
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                '数据库尚未初始化',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                '点击下方按钮初始化数据库',
+                style: TextStyle(fontSize: 14, color: Colors.grey),
+              ),
+              const SizedBox(height: 20),
+              FilledButton(
+                onPressed: _initDatabase,
+                child: const Text('初始化数据库'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLinkCard(TvLink link, bool isManageMode) {
+    final isDark = FluentTheme.of(context).brightness == Brightness.dark;
+    return Card(
+      borderRadius: BorderRadius.circular(8),
+      margin: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: accentColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              WindowsIcons.video,
+              color: accentColor,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  link.name,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  link.url,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark ? Colors.grey[20] : Colors.grey[80],
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Tooltip(
+            message: '打开链接',
+            child: IconButton(
+              icon: const Icon(FluentIcons.open_in_new_window),
+              onPressed: () => _openUrl(link.url),
+            ),
+          ),
+          if (isManageMode) ...[
+            Tooltip(
+              message: '编辑',
+              child: IconButton(
+                icon: const Icon(FluentIcons.edit),
+                onPressed: () => _showEditDialog(link.id),
+              ),
+            ),
+            Tooltip(
+              message: '删除',
+              child: IconButton(
+                icon: const Icon(FluentIcons.delete),
+                onPressed: () => _showDeleteDialog(link.id),
+              ),
             ),
           ],
-        ),
-      );
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHomePage() {
+    if (!_dbInitialized) {
+      return _buildUninitializedView();
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text('轻松跳转到您喜爱的电视台直播',
-            style: FluentTheme.of(context).typography.body),
-        const SizedBox(height: 10),
-        Expanded(
-          child: _links.isEmpty
-              ? const Center(child: Text('暂无直播链接'))
-              : Table(
-                  border: TableBorder.all(),
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Expanded(
+        child: _links.isEmpty
+            ? Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    const TableRow(
-                      decoration: BoxDecoration(color: greyColor),
-                      children: [
-                        TableCell(child: Center(child: Text('编号'))),
-                        TableCell(child: Center(child: Text('节目名称'))),
-                        TableCell(child: Center(child: Text('直播链接'))),
-                      ],
+                    Icon(
+                      FluentIcons.video,
+                      size: 64,
+                      color: Colors.grey[40],
                     ),
-                    for (var link in _links)
-                      TableRow(
-                        children: [
-                          TableCell(child: Center(child: Text('${link.id}'))),
-                          TableCell(child: Center(child: Text(link.name))),
-                          TableCell(
-                            child: Center(
-                              child: GestureDetector(
-                                onTap: () => _openUrl(link.url),
-                                child: Text(
-                                  link.url,
-                                  style: const TextStyle(color: linkColor),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                    const SizedBox(height: 16),
+                    Text(
+                      '暂无直播链接',
+                      style: FluentTheme.of(context).typography.bodyLarge,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '请切换到管理页面添加直播链接',
+                      style: TextStyle(
+                        color: Colors.grey[60],
                       ),
+                    ),
                   ],
                 ),
-        ),
-      ],
+              )
+            : ListView.builder(
+                itemCount: _links.length,
+                itemBuilder: (context, index) {
+                  final link = _links[index];
+                  return _buildLinkCard(link, false);
+                },
+              ),
+      ),
     );
   }
 
   Widget _buildManagePage() {
     if (!_dbInitialized) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('数据库尚未初始化'),
-            const SizedBox(height: 20),
-            FilledButton(
-              onPressed: _initDatabase,
-              child: const Text('初始化数据库'),
-            ),
-          ],
-        ),
-      );
+      return _buildUninitializedView();
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('节目列表', style: FluentTheme.of(context).typography.title),
-            FilledButton(
-              onPressed: _showAddDialog,
-              child: const Text('添加节目'),
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        Expanded(
-          child: _links.isEmpty
-              ? const Center(child: Text('暂无直播链接'))
-              : Table(
-                  border: TableBorder.all(),
-                  children: [
-                    const TableRow(
-                      decoration: BoxDecoration(color: greyColor),
-                      children: [
-                        TableCell(child: Center(child: Text('编号'))),
-                        TableCell(child: Center(child: Text('节目名称'))),
-                        TableCell(child: Center(child: Text('直播链接'))),
-                        TableCell(child: Center(child: Text('操作'))),
-                      ],
-                    ),
-                    for (var link in _links)
-                      TableRow(
-                        children: [
-                          TableCell(child: Center(child: Text('${link.id}'))),
-                          TableCell(child: Center(child: Text(link.name))),
-                          TableCell(
-                            child: Center(
-                              child: GestureDetector(
-                                onTap: () => _openUrl(link.url),
-                                child: Text(
-                                  link.url,
-                                  style: const TextStyle(color: linkColor),
-                                ),
-                              ),
-                            ),
-                          ),
-                          TableCell(
-                            child: Center(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  HyperlinkButton(
-                                    onPressed: () => _showEditDialog(link.id),
-                                    child: const Text('编辑'),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  HyperlinkButton(
-                                    onPressed: () => _showDeleteDialog(link.id),
-                                    child: const Text('删除'),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CommandBar(
+            primaryItems: [
+              CommandBarButton(
+                icon: const Icon(FluentIcons.add),
+                label: const Text('添加节目'),
+                onPressed: _showAddDialog,
+              ),
+            ],
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Divider(),
+          ),
+          Expanded(
+            child: _links.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        FluentIcons.list,
+                        size: 64,
+                        color: Colors.grey[40],
                       ),
-                  ],
+                      const SizedBox(height: 16),
+                      Text(
+                        '暂无直播链接',
+                        style: FluentTheme.of(context).typography.bodyLarge,
+                      ),
+                      const SizedBox(height: 8),
+                      FilledButton(
+                        onPressed: _showAddDialog,
+                        child: const Text('添加第一个节目'),
+                      ),
+                    ],
+                  ),
+                )
+              : ListView.builder(
+                  itemCount: _links.length,
+                  itemBuilder: (context, index) {
+                    final link = _links[index];
+                    return _buildLinkCard(link, true);
+                  },
                 ),
-        ),
-      ],
+          ),
+        ],
+      ),
     );
   }
 

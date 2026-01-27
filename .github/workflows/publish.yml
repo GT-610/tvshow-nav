@@ -4,12 +4,6 @@ on:
   push:
     tags:
       - v* # When a tag starting with v is pushed, trigger the workflow, e.g. v0.1.0
-  workflow_dispatch:
-    inputs:
-      debug:
-        description: 'Run in debug mode'
-        required: false
-        default: 'false'
 
 jobs:
   release-windows:
@@ -33,9 +27,14 @@ jobs:
       - name: Build Windows release
         run: flutter build windows --release
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v6
+      - name: Package release
+        run: Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath release-windows.zip
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: tvshow-nav-windows
-          path: build\windows\x64\runner\Release\
-          compression-level: 0
+          files: release-windows.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

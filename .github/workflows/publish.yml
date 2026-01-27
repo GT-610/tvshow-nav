@@ -9,6 +9,8 @@ jobs:
   release-windows:
     name: Release Windows
     runs-on: windows-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -34,7 +36,3 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: release-windows.zip
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

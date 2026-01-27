@@ -7,6 +7,7 @@ class DbHelper {
   static final DbHelper instance = DbHelper._init();
   static Database? _database;
   static bool _initialized = false;
+  static bool _dataDirEnsured = false;
 
   DbHelper._init();
 
@@ -26,10 +27,12 @@ class DbHelper {
   }
 
   Future<void> _ensureDataDir() async {
+    if (_dataDirEnsured) return;
     final dataDir = dirname(getDbPath());
     if (!await Directory(dataDir).exists()) {
       await Directory(dataDir).create(recursive: true);
     }
+    _dataDirEnsured = true;
   }
 
   Future<bool> dbExists() async {

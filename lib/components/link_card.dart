@@ -19,6 +19,23 @@ class LinkCard extends StatefulWidget {
 }
 
 class _LinkCardState extends State<LinkCard> {
+  Future<void> _showErrorDialog(String title, String content) async {
+    if (!mounted) return;
+    await showDialog(
+      context: context,
+      builder: (context) => ContentDialog(
+        actions: <Widget>[
+          Button(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('确定'),
+          ),
+        ],
+        content: Text(content),
+        title: Text(title),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -62,40 +79,10 @@ class _LinkCardState extends State<LinkCard> {
                     if (await canLaunchUrl(uri)) {
                       await launchUrl(uri);
                     } else {
-                      if (mounted) {
-                        await showDialog(
-                          // ignore: use_build_context_synchronously
-                          context: context,
-                          builder: (context) => ContentDialog(
-                            actions: <Widget>[
-                              Button(
-                                onPressed: () => Navigator.of(context).pop(),
-                                child: const Text('确定'),
-                              ),
-                            ],
-                            content: const Text('无法打开链接'),
-                            title: const Text('打开失败'),
-                          ),
-                        );
-                      }
+                      await _showErrorDialog('打开失败', '无法打开链接');
                     }
                   } catch (e) {
-                    if (mounted) {
-                      await showDialog(
-                        // ignore: use_build_context_synchronously
-                        context: context,
-                        builder: (context) => ContentDialog(
-                          actions: <Widget>[
-                            Button(
-                              onPressed: () => Navigator.of(context).pop(),
-                              child: const Text('确定'),
-                            ),
-                          ],
-                          content: Text('打开链接时出错: $e'),
-                          title: const Text('错误'),
-                        ),
-                      );
-                    }
+                    await _showErrorDialog('错误', '打开链接时出错: $e');
                   }
                 },
               ),

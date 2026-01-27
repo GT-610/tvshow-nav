@@ -56,13 +56,6 @@ class LinkController extends ChangeNotifier {
     await loadLinks();
   }
 
-  void resetFields() {
-    _editId = 0;
-    _editName = '';
-    _editUrl = '';
-    notifyListeners();
-  }
-
   int _editId = 0;
   String _editName = '';
   String _editUrl = '';

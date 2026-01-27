@@ -20,8 +20,16 @@ class DbHelper {
   }
 
   String getDbPath() {
-    final exePath = Platform.resolvedExecutable;
-    return join(dirname(exePath), 'data.db');
+    final exeDir = dirname(Platform.resolvedExecutable);
+    final dataDir = join(exeDir, 'data');
+    return join(dataDir, 'data.db');
+  }
+
+  Future<void> _ensureDataDir() async {
+    final dataDir = dirname(getDbPath());
+    if (!await Directory(dataDir).exists()) {
+      await Directory(dataDir).create(recursive: true);
+    }
   }
 
   Future<bool> dbExists() async {
@@ -30,6 +38,7 @@ class DbHelper {
 
   Future<void> initDatabase() async {
     await _initDatabaseFactory();
+    await _ensureDataDir();
     final path = getDbPath();
     if (await File(path).exists()) return;
     await openDatabase(
@@ -41,6 +50,7 @@ class DbHelper {
 
   Future<Database> get database async {
     await _initDatabaseFactory();
+    await _ensureDataDir();
     if (_database != null) return _database!;
     final path = getDbPath();
     if (!await File(path).exists()) {

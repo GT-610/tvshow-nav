@@ -1,6 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:tvshow_nav/models/link.dart';
-import 'package:tvshow_nav/components/uninitialized_view.dart';
 import 'package:tvshow_nav/components/link_card.dart';
 import 'package:tvshow_nav/components/empty_state.dart';
 
@@ -9,7 +8,6 @@ typedef OnEdit = void Function(int id);
 typedef OnDelete = void Function(int id);
 
 class ManagePage extends StatelessWidget {
-  final bool dbInitialized;
   final List<TvLink> links;
   final OnAdd onAdd;
   final OnEdit onEdit;
@@ -17,7 +15,6 @@ class ManagePage extends StatelessWidget {
 
   const ManagePage({
     super.key,
-    required this.dbInitialized,
     required this.links,
     required this.onAdd,
     required this.onEdit,
@@ -26,10 +23,6 @@ class ManagePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!dbInitialized) {
-      return const UninitializedView();
-    }
-
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(

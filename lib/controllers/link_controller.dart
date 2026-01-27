@@ -5,11 +5,9 @@ import 'package:tvshow_nav/models/link.dart';
 
 class LinkController extends ChangeNotifier {
   List<TvLink> _links = [];
-  bool _dbInitialized = false;
   bool _isManagePage = false;
 
   List<TvLink> get links => _links;
-  bool get dbInitialized => _dbInitialized;
   bool get isManagePage => _isManagePage;
 
   void setManagePage(bool value) {
@@ -20,8 +18,9 @@ class LinkController extends ChangeNotifier {
   Future<void> initialize() async {
     final dbPath = DbHelper.instance.getDbPath();
     final exists = await File(dbPath).exists();
-    _dbInitialized = exists;
-    if (exists) {
+    if (!exists) {
+      await DbHelper.instance.initDatabase();
+    } else {
       await loadLinks();
     }
     notifyListeners();

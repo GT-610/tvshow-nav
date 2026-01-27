@@ -318,7 +318,6 @@ class _MainPageState extends State<MainPage> {
             icon: const Icon(WindowsIcons.home),
             title: const Text('首页'),
             body: HomePage(
-              dbInitialized: linkController.dbInitialized,
               links: linkController.links,
             ),
           ),
@@ -326,7 +325,6 @@ class _MainPageState extends State<MainPage> {
             icon: const Icon(WindowsIcons.settings),
             title: const Text('设置'),
             body: ManagePage(
-              dbInitialized: linkController.dbInitialized,
               links: linkController.links,
               onAdd: _showAddDialog,
               onEdit: _showEditDialog,

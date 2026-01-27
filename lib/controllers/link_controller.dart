@@ -36,7 +36,7 @@ class LinkController extends ChangeNotifier {
       return;
     }
 
-    final newLink = TvLink(id: 0, name: name, url: url);
+    final newLink = TvLink(id: null, name: name, url: url);
     await DbHelper.instance.addLink(newLink);
     await loadLinks();
   }

@@ -146,7 +146,8 @@ class _MainPageState extends State<MainPage> {
     if (!mounted) return;
     final controller = context.read<LinkController>();
     final link = controller.links.firstWhere((l) => l.id == id);
-    controller.setEditFields(link.id, link.name, link.url);
+    if (link.id == null) return;
+    controller.setEditFields(link.id!, link.name, link.url);
     _nameController.text = link.name;
     _nameController.selection = TextSelection.fromPosition(
       TextPosition(offset: link.name.length),

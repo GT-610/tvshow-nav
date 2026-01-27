@@ -1,20 +1,23 @@
 class TvLink {
-  final int id;
+  final int? id;
   final String name;
   final String url;
 
   TvLink({
-    required this.id,
+    this.id,
     required this.name,
     required this.url,
   });
 
   Map<String, dynamic> toMap() {
-    return {
-      'id': id,
+    final map = <String, dynamic>{
       'name': name,
       'url': url,
     };
+    if (id != null) {
+      map['id'] = id;
+    }
+    return map;
   }
 
   factory TvLink.fromMap(Map<String, dynamic> map) {

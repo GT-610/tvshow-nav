@@ -57,8 +57,8 @@ class ManagePage extends StatelessWidget {
                       final link = links[index];
                       return LinkCard(
                         link: link,
-                        onEdit: () => onEdit(link.id),
-                        onDelete: () => onDelete(link.id),
+                        onEdit: link.id != null ? () => onEdit(link.id!) : null,
+                        onDelete: link.id != null ? () => onDelete(link.id!) : null,
                       );
                     },
                   ),

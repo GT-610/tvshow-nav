@@ -1,13 +1,20 @@
 import 'dart:io';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:provider/provider.dart';
 import 'package:tvshow_nav/db/db_helper.dart';
 import 'package:tvshow_nav/models/link.dart';
 import 'package:tvshow_nav/components/home_page.dart';
 import 'package:tvshow_nav/components/manage_page.dart';
+import 'package:tvshow_nav/theme.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => AppTheme(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -15,10 +22,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appTheme = context.watch<AppTheme>();
     return FluentApp(
       title: '电视直播导航',
       theme: FluentThemeData(brightness: Brightness.light),
       darkTheme: FluentThemeData(brightness: Brightness.dark),
+      themeMode: appTheme.mode,
       locale: const Locale('zh', 'CN'),
       supportedLocales: const [
         Locale('zh', 'CN'),
@@ -241,6 +250,7 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
+    final appTheme = context.watch<AppTheme>();
     return NavigationView(
       pane: NavigationPane(
         displayMode: PaneDisplayMode.top,
@@ -250,12 +260,17 @@ class _MainPageState extends State<MainPage> {
             _isManagePage = index == 1;
           });
         },
-        
-        header: const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          child: Text(
-            '电视直播导航',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        header: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: Row(
+            children: [
+              const Text(
+                '电视直播导航',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(width: 16),
+              _buildThemeButton(appTheme),
+            ],
           ),
         ),
         items: [
@@ -269,7 +284,7 @@ class _MainPageState extends State<MainPage> {
           ),
           PaneItem(
             icon: const Icon(WindowsIcons.settings),
-            title: const Text('管理节目'),
+            title: const Text('设置'),
             body: ManagePage(
               dbInitialized: _dbInitialized,
               links: _links,
@@ -280,6 +295,52 @@ class _MainPageState extends State<MainPage> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildThemeButton(AppTheme appTheme) {
+    final menuChildren = [
+      _buildThemeMenuItem(ThemeMode.system, '跟随系统'),
+      _buildThemeMenuItem(ThemeMode.light, '亮色'),
+      _buildThemeMenuItem(ThemeMode.dark, '暗色'),
+    ];
+
+    String currentThemeText = '跟随系统';
+    switch (appTheme.mode) {
+      case ThemeMode.light:
+        currentThemeText = '亮色';
+        break;
+      case ThemeMode.dark:
+        currentThemeText = '暗色';
+        break;
+      case ThemeMode.system:
+        currentThemeText = '跟随系统';
+        break;
+    }
+
+    return DropDownButton(
+      leading: const Icon(FluentIcons.sunny),
+      title: Text(currentThemeText),
+      items: menuChildren,
+    );
+  }
+
+  MenuFlyoutItem _buildThemeMenuItem(ThemeMode mode, String text) {
+    final isSelected = context.watch<AppTheme>().mode == mode;
+    return MenuFlyoutItem(
+      text: Row(
+        children: [
+          if (isSelected)
+            Icon(
+              WindowsIcons.check_mark,
+              size: 14,
+              color: FluentTheme.of(context).accentColor,
+            ),
+          if (isSelected) const SizedBox(width: 8),
+          Text(text),
+        ],
+      ),
+      onPressed: () => context.read<AppTheme>().mode = mode,
     );
   }
 }

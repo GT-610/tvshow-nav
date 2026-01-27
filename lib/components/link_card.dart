@@ -16,7 +16,6 @@ class LinkCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = FluentTheme.of(context).brightness == Brightness.dark;
     return Card(
       borderRadius: BorderRadius.circular(8),
       child: Padding(

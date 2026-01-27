@@ -7,8 +7,17 @@ import 'package:tvshow_nav/models/link.dart';
 import 'package:tvshow_nav/components/home_page.dart';
 import 'package:tvshow_nav/components/manage_page.dart';
 import 'package:tvshow_nav/theme.dart';
+import 'package:window_manager/window_manager.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await WindowManager.instance.ensureInitialized();
+  await WindowManager.instance.setTitleBarStyle(
+    TitleBarStyle.hidden,
+    windowButtonVisibility: true,
+  );
+  await WindowManager.instance.setMinimumSize(const Size(500, 600));
+
   runApp(
     ChangeNotifierProvider(
       create: (context) => AppTheme(),
@@ -129,13 +138,13 @@ class _MainPageState extends State<MainPage> {
       context: context,
       builder: (context) => ContentDialog(
         actions: <Widget>[
-          Button(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('取消'),
-          ),
           FilledButton(
             onPressed: _addLink,
             child: const Text('添加'),
+          ),
+          Button(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('取消'),
           ),
         ],
         content: Column(
@@ -173,13 +182,13 @@ class _MainPageState extends State<MainPage> {
       context: context,
       builder: (context) => ContentDialog(
         actions: <Widget>[
-          Button(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('取消'),
-          ),
           FilledButton(
             onPressed: _updateLink,
             child: const Text('更新'),
+          ),
+          Button(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('取消'),
           ),
         ],
         content: Column(
@@ -224,16 +233,16 @@ class _MainPageState extends State<MainPage> {
       context: context,
       builder: (context) => ContentDialog(
         actions: <Widget>[
-          Button(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('取消'),
-          ),
           FilledButton(
             onPressed: _deleteLink,
             style: const ButtonStyle(
-              backgroundColor: WidgetStatePropertyAll(Color(0xFFFF0000)),
+              backgroundColor: WidgetStatePropertyAll(Colors.warningPrimaryColor),
             ),
             child: const Text('删除'),
+          ),
+          Button(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('取消'),
           ),
         ],
         content: Text('确定要删除节目 $_editName 吗？此操作不可恢复。'),
@@ -251,7 +260,38 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     final appTheme = context.watch<AppTheme>();
+    final theme = FluentTheme.of(context);
     return NavigationView(
+      appBar: NavigationAppBar(
+        automaticallyImplyLeading: false,
+        title: DragToMoveArea(
+          child: Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(width: 8),
+                const Text('电视直播导航'),
+              ],
+            ),
+          ),
+        ),
+        actions: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            _buildThemeButton(appTheme),
+            const SizedBox(width: 8),
+            SizedBox(
+              width: 138,
+              height: 50,
+              child: WindowCaption(
+                brightness: theme.brightness,
+                backgroundColor: Colors.transparent,
+              ),
+            ),
+          ],
+        ),
+      ),
       pane: NavigationPane(
         displayMode: PaneDisplayMode.top,
         selected: _isManagePage ? 1 : 0,
@@ -260,19 +300,6 @@ class _MainPageState extends State<MainPage> {
             _isManagePage = index == 1;
           });
         },
-        header: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          child: Row(
-            children: [
-              const Text(
-                '电视直播导航',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(width: 16),
-              _buildThemeButton(appTheme),
-            ],
-          ),
-        ),
         items: [
           PaneItem(
             icon: const Icon(WindowsIcons.home),
@@ -326,20 +353,8 @@ class _MainPageState extends State<MainPage> {
   }
 
   MenuFlyoutItem _buildThemeMenuItem(ThemeMode mode, String text) {
-    final isSelected = context.watch<AppTheme>().mode == mode;
     return MenuFlyoutItem(
-      text: Row(
-        children: [
-          if (isSelected)
-            Icon(
-              WindowsIcons.check_mark,
-              size: 14,
-              color: FluentTheme.of(context).accentColor,
-            ),
-          if (isSelected) const SizedBox(width: 8),
-          Text(text),
-        ],
-      ),
+      text: Text(text),
       onPressed: () => context.read<AppTheme>().mode = mode,
     );
   }

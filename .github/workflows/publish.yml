@@ -4,55 +4,38 @@ on:
   push:
     tags:
       - v* # When a tag starting with v is pushed, trigger the workflow, e.g. v0.1.0
+  workflow_dispatch:
+    inputs:
+      debug:
+        description: 'Run in debug mode'
+        required: false
+        default: 'false'
 
 jobs:
-  publish-tauri:
-    permissions:
-      contents: write
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - platform: 'macos-latest' # for Arm based macs (M1 and above).
-            args: '--target aarch64-apple-darwin'
-          - platform: 'macos-latest' # for Intel based macs.
-            args: '--target x86_64-apple-darwin'
-          - platform: 'ubuntu-22.04'
-            args: ''
-          - platform: 'windows-latest'
-            args: ''
-
-    runs-on: ${{ matrix.platform }}
+  release-windows:
+    name: Release Windows
+    runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - name: setup node
-        uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v6
         with:
-          node-version: lts/*
+          submodules: recursive
 
-      - name: install Rust stable
-        uses: dtolnay/rust-toolchain@stable
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
         with:
-          # Those targets are only used on macos runners so it's in an `if` to slightly speed up windows and linux builds.
-          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+          flutter-version: '3.38.5'
+          channel: 'stable'
 
-      - name: install dependencies (ubuntu only)
-        if: matrix.platform == 'ubuntu-22.04' # This must match the platform value defined above.
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+      - name: Install dependencies
+        run: flutter pub get
 
-      - name: install frontend dependencies
-        run: npm install
+      - name: Build Windows release
+        run: flutter build windows --release
 
-      - uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload artifact
+        uses: actions/upload-artifact@v6
         with:
-          tagName: ${{ github.ref_name }} # Use the tag name as the release tag
-          releaseName: '${{ github.ref_name }}' # Use the tag name as the release name
-          releaseBody: 'See the assets to download this version and install.'
-          releaseDraft: false # Publish the release directly, not as a draft
-          prerelease: false
-          args: ${{ matrix.args }}
+          name: tvshow-nav-windows
+          path: build\windows\x64\runner\Release\
+          compression-level: 0

@@ -1,10 +1,10 @@
-import 'dart:io';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:tvshow_nav/controllers/link_controller.dart';
 import 'package:tvshow_nav/db/db_helper.dart';
-import 'package:tvshow_nav/models/link.dart';
 import 'package:tvshow_nav/components/home_page.dart';
+import 'package:tvshow_nav/components/link_form.dart';
 import 'package:tvshow_nav/components/manage_page.dart';
 import 'package:tvshow_nav/theme.dart';
 import 'package:window_manager/window_manager.dart';
@@ -19,15 +19,43 @@ void main() async {
   await WindowManager.instance.setMinimumSize(const Size(500, 600));
 
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => AppTheme(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => AppTheme()),
+        ChangeNotifierProvider(create: (context) => LinkController()),
+      ],
       child: const MyApp(),
     ),
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    DbHelper.instance.close();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.detached) {
+      DbHelper.instance.close();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,87 +87,39 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  bool _isManagePage = false;
-  bool _dbInitialized = false;
-  List<TvLink> _links = [];
-
-  int _editId = 0;
-  String _editName = '';
-  String _editUrl = '';
+  late final TextEditingController _nameController;
+  late final TextEditingController _urlController;
 
   @override
   void initState() {
     super.initState();
-    _checkAndInitDatabase();
-  }
-
-  Future<void> _checkAndInitDatabase() async {
-    final dbPath = DbHelper.instance.getDbPath();
-    final exists = await File(dbPath).exists();
-    if (exists) {
-      if (!mounted) return;
-      setState(() {
-        _dbInitialized = true;
-      });
-      await _loadLinks();
-    } else {
-      if (!mounted) return;
-      setState(() {
-        _dbInitialized = false;
-      });
-    }
-  }
-
-  Future<void> _loadLinks() async {
-    final links = await DbHelper.instance.getLinks();
-    if (!mounted) return;
-    setState(() {
-      _links = links;
+    _nameController = TextEditingController();
+    _urlController = TextEditingController();
+    Future.microtask(() {
+      // ignore: use_build_context_synchronously
+      context.read<LinkController>().initialize();
     });
   }
 
-  Future<void> _addLink() async {
-    if (_editName.trim().isEmpty || _editUrl.trim().isEmpty) {
-      return;
-    }
-
-    final newLink = TvLink(id: 0, name: _editName, url: _editUrl);
-    await DbHelper.instance.addLink(newLink);
-    await _loadLinks();
-    if (!mounted) return;
-    Navigator.of(context).pop();
-    _resetEditFields();
-  }
-
-  Future<void> _updateLink() async {
-    if (_editName.trim().isEmpty || _editUrl.trim().isEmpty) {
-      return;
-    }
-
-    final updatedLink = TvLink(id: _editId, name: _editName, url: _editUrl);
-    await DbHelper.instance.updateLink(updatedLink);
-    await _loadLinks();
-    if (!mounted) return;
-    Navigator.of(context).pop();
-    _resetEditFields();
-  }
-
-  Future<void> _deleteLink() async {
-    await DbHelper.instance.deleteLink(_editId);
-    await _loadLinks();
-    if (!mounted) return;
-    Navigator.of(context).pop();
-    _resetEditFields();
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _urlController.dispose();
+    super.dispose();
   }
 
   void _showAddDialog() {
-    _resetEditFields();
+    if (!mounted) return;
+    _nameController.clear();
+    _urlController.clear();
+    context.read<LinkController>().clearEditFields();
+    // ignore: use_build_context_synchronously
     showDialog(
       context: context,
       builder: (context) => ContentDialog(
         actions: <Widget>[
           FilledButton(
-            onPressed: _addLink,
+            onPressed: () => _addLink(),
             child: const Text('添加'),
           ),
           Button(
@@ -147,26 +127,15 @@ class _MainPageState extends State<MainPage> {
             child: const Text('取消'),
           ),
         ],
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            InfoLabel(
-              label: '节目名称',
-              child: TextBox(
-                placeholder: '请输入节目名称',
-                onChanged: (value) => setState(() => _editName = value),
-              ),
-            ),
-            const SizedBox(height: 12),
-            InfoLabel(
-              label: '直播链接',
-              child: TextBox(
-                placeholder: '请输入直播链接',
-                onChanged: (value) => setState(() => _editUrl = value),
-              ),
-            ),
-          ],
+        content: LinkForm(
+          nameController: _nameController,
+          urlController: _urlController,
+          onNameChanged: (value) {
+            context.read<LinkController>().setEditName(value);
+          },
+          onUrlChanged: (value) {
+            context.read<LinkController>().setEditUrl(value);
+          },
         ),
         title: const Text('添加新节目'),
       ),
@@ -174,16 +143,25 @@ class _MainPageState extends State<MainPage> {
   }
 
   void _showEditDialog(int id) {
-    final link = _links.firstWhere((l) => l.id == id);
-    _editId = link.id;
-    _editName = link.name;
-    _editUrl = link.url;
+    if (!mounted) return;
+    final controller = context.read<LinkController>();
+    final link = controller.links.firstWhere((l) => l.id == id);
+    controller.setEditFields(link.id, link.name, link.url);
+    _nameController.text = link.name;
+    _nameController.selection = TextSelection.fromPosition(
+      TextPosition(offset: link.name.length),
+    );
+    _urlController.text = link.url;
+    _urlController.selection = TextSelection.fromPosition(
+      TextPosition(offset: link.url.length),
+    );
+    // ignore: use_build_context_synchronously
     showDialog(
       context: context,
       builder: (context) => ContentDialog(
         actions: <Widget>[
           FilledButton(
-            onPressed: _updateLink,
+            onPressed: () => _updateLink(),
             child: const Text('更新'),
           ),
           Button(
@@ -191,34 +169,15 @@ class _MainPageState extends State<MainPage> {
             child: const Text('取消'),
           ),
         ],
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            InfoLabel(
-              label: '节目名称',
-              child: TextBox(
-                placeholder: '请输入节目名称',
-                controller: TextEditingController(text: _editName)
-                  ..selection = TextSelection.fromPosition(
-                    TextPosition(offset: _editName.length),
-                  ),
-                onChanged: (value) => setState(() => _editName = value),
-              ),
-            ),
-            const SizedBox(height: 12),
-            InfoLabel(
-              label: '直播链接',
-              child: TextBox(
-                placeholder: '请输入直播链接',
-                controller: TextEditingController(text: _editUrl)
-                  ..selection = TextSelection.fromPosition(
-                    TextPosition(offset: _editUrl.length),
-                  ),
-                onChanged: (value) => setState(() => _editUrl = value),
-              ),
-            ),
-          ],
+        content: LinkForm(
+          nameController: _nameController,
+          urlController: _urlController,
+          onNameChanged: (value) {
+            context.read<LinkController>().setEditName(value);
+          },
+          onUrlChanged: (value) {
+            context.read<LinkController>().setEditUrl(value);
+          },
         ),
         title: const Text('编辑节目'),
       ),
@@ -226,15 +185,16 @@ class _MainPageState extends State<MainPage> {
   }
 
   void _showDeleteDialog(int id) {
-    final link = _links.firstWhere((l) => l.id == id);
-    _editId = link.id;
-    _editName = link.name;
+    if (!mounted) return;
+    final controller = context.read<LinkController>();
+    final link = controller.links.firstWhere((l) => l.id == id);
+    // ignore: use_build_context_synchronously
     showDialog(
       context: context,
       builder: (context) => ContentDialog(
         actions: <Widget>[
           FilledButton(
-            onPressed: _deleteLink,
+            onPressed: () => _deleteLink(id),
             style: const ButtonStyle(
               backgroundColor: WidgetStatePropertyAll(Colors.warningPrimaryColor),
             ),
@@ -245,22 +205,77 @@ class _MainPageState extends State<MainPage> {
             child: const Text('取消'),
           ),
         ],
-        content: Text('确定要删除节目 $_editName 吗？此操作不可恢复。'),
+        content: Text('确定要删除节目 ${link.name} 吗？此操作不可恢复。'),
         title: const Text('确认删除'),
       ),
     );
   }
 
-  void _resetEditFields() {
-    _editId = 0;
-    _editName = '';
-    _editUrl = '';
+  Future<void> _addLink() async {
+    final controller = context.read<LinkController>();
+    if (!controller.validateInputs()) {
+      return;
+    }
+
+    try {
+      await controller.addLink(controller.editName, controller.editUrl);
+      if (!mounted) return;
+      Navigator.of(context).pop();
+    } catch (e) {
+      if (!mounted) return;
+      _showErrorDialog('添加失败', '无法添加节目: $e');
+    }
+  }
+
+  Future<void> _updateLink() async {
+    final controller = context.read<LinkController>();
+    if (!controller.validateInputs()) {
+      return;
+    }
+
+    try {
+      await controller.updateLink(controller.editId, controller.editName, controller.editUrl);
+      if (!mounted) return;
+      Navigator.of(context).pop();
+    } catch (e) {
+      if (!mounted) return;
+      _showErrorDialog('更新失败', '无法更新节目: $e');
+    }
+  }
+
+  Future<void> _deleteLink(int id) async {
+    try {
+      await context.read<LinkController>().deleteLink(id);
+      if (!mounted) return;
+      Navigator.of(context).pop();
+    } catch (e) {
+      if (!mounted) return;
+      _showErrorDialog('删除失败', '无法删除节目: $e');
+    }
+  }
+
+  void _showErrorDialog(String title, String content) {
+    // ignore: use_build_context_synchronously
+    showDialog(
+      context: context,
+      builder: (context) => ContentDialog(
+        actions: <Widget>[
+          Button(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('确定'),
+          ),
+        ],
+        content: Text(content),
+        title: Text(title),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final appTheme = context.watch<AppTheme>();
     final theme = FluentTheme.of(context);
+    final linkController = context.watch<LinkController>();
     return NavigationView(
       appBar: NavigationAppBar(
         automaticallyImplyLeading: false,
@@ -294,27 +309,25 @@ class _MainPageState extends State<MainPage> {
       ),
       pane: NavigationPane(
         displayMode: PaneDisplayMode.top,
-        selected: _isManagePage ? 1 : 0,
+        selected: linkController.isManagePage ? 1 : 0,
         onChanged: (index) {
-          setState(() {
-            _isManagePage = index == 1;
-          });
+          context.read<LinkController>().setManagePage(index == 1);
         },
         items: [
           PaneItem(
             icon: const Icon(WindowsIcons.home),
             title: const Text('首页'),
             body: HomePage(
-              dbInitialized: _dbInitialized,
-              links: _links,
+              dbInitialized: linkController.dbInitialized,
+              links: linkController.links,
             ),
           ),
           PaneItem(
             icon: const Icon(WindowsIcons.settings),
             title: const Text('设置'),
             body: ManagePage(
-              dbInitialized: _dbInitialized,
-              links: _links,
+              dbInitialized: linkController.dbInitialized,
+              links: linkController.links,
               onAdd: _showAddDialog,
               onEdit: _showEditDialog,
               onDelete: _showDeleteDialog,

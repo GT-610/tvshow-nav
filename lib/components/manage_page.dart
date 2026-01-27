@@ -2,6 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:tvshow_nav/models/link.dart';
 import 'package:tvshow_nav/components/uninitialized_view.dart';
 import 'package:tvshow_nav/components/link_card.dart';
+import 'package:tvshow_nav/components/empty_state.dart';
 
 typedef OnAdd = void Function();
 typedef OnEdit = void Function(int id);
@@ -49,27 +50,12 @@ class ManagePage extends StatelessWidget {
           ),
           Expanded(
             child: links.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          WindowsIcons.list,
-                          size: 64,
-                          color: Colors.grey[40],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          '暂无直播链接',
-                          style:
-                              FluentTheme.of(context).typography.bodyLarge,
-                        ),
-                        const SizedBox(height: 8),
-                        FilledButton(
-                          onPressed: onAdd,
-                          child: const Text('添加第一个节目'),
-                        ),
-                      ],
+                ? EmptyState(
+                    icon: WindowsIcons.list,
+                    title: '暂无直播链接',
+                    action: FilledButton(
+                      onPressed: onAdd,
+                      child: const Text('添加第一个节目'),
                     ),
                   )
                 : ListView.builder(

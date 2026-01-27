@@ -17,15 +17,12 @@
 - **数据库**: SQLite (sqflite)
 - **平台**: Windows 10/11
 
-## 运行方式
+## 构建
 ```bash
-flutter run -d windows
-```
-
-## 构建发布版本
-```bash
+flutter pub get
 flutter build windows
 ```
+
 ## 注意事项
 - 该项目本来为自用用途，**未做足够的安全性考查**，**不建议直接用于生产环境**。本人也**不为该项目负任何责任**。
 

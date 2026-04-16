@@ -25,7 +25,9 @@ void main() {
 
     await tester.enterText(find.byType(TextBox).at(0), '新闻频道');
     await tester.enterText(
-        find.byType(TextBox).at(1), 'https://example.com/live');
+      find.byType(TextBox).at(1),
+      'https://example.com/live',
+    );
     await tester.tap(find.text('添加'));
     await tester.pumpAndSettle();
 
@@ -53,7 +55,7 @@ void main() {
     await tester.pumpWidget(
       TvShowNavApp(
         linkStore: MemoryLinkStore(
-          initialLinks: [
+          initialLinks: const [
             TvLink(id: 1, name: '测试节目', url: 'not-a-url'),
           ],
         ),
@@ -67,10 +69,48 @@ void main() {
     expect(find.text('直播链接格式无效，请先在设置里检查这个节目的地址。'), findsOneWidget);
   });
 
+  testWidgets('增删改不会触发额外整表刷新', (WidgetTester tester) async {
+    final store = MemoryLinkStore();
+    await tester.pumpWidget(TvShowNavApp(linkStore: store));
+    await tester.pumpAndSettle();
+
+    expect(store.getLinksCallCount, 1);
+
+    await tester.tap(find.text('设置'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('添加节目'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextBox).at(0), '新闻频道');
+    await tester.enterText(
+      find.byType(TextBox).at(1),
+      'https://example.com/live',
+    );
+    await tester.tap(find.text('添加'));
+    await tester.pumpAndSettle();
+
+    expect(store.getLinksCallCount, 1);
+
+    await tester.tap(find.byIcon(WindowsIcons.edit));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextBox).at(0), '央视新闻');
+    await tester.tap(find.text('更新'));
+    await tester.pumpAndSettle();
+
+    expect(store.getLinksCallCount, 1);
+
+    await tester.tap(find.byIcon(WindowsIcons.delete));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('删除'));
+    await tester.pumpAndSettle();
+
+    expect(store.getLinksCallCount, 1);
+  });
+
   testWidgets('初始化失败时显示错误和重试入口', (WidgetTester tester) async {
     final store = MemoryLinkStore(
       failInitializeCount: 1,
-      initialLinks: [
+      initialLinks: const [
         TvLink(id: 1, name: '测试节目', url: 'https://example.com/live'),
       ],
     );
@@ -102,7 +142,9 @@ void main() {
 
     await tester.enterText(find.byType(TextBox).at(0), '新闻频道');
     await tester.enterText(
-        find.byType(TextBox).at(1), 'https://example.com/live');
+      find.byType(TextBox).at(1),
+      'https://example.com/live',
+    );
     await tester.tap(find.text('添加'));
     await tester.pumpAndSettle();
 
@@ -115,7 +157,7 @@ void main() {
       TvShowNavApp(
         linkStore: MemoryLinkStore(
           failDelete: true,
-          initialLinks: [
+          initialLinks: const [
             TvLink(id: 1, name: '测试节目', url: 'https://example.com/live'),
           ],
         ),
@@ -133,37 +175,6 @@ void main() {
     expect(find.text('删除失败'), findsOneWidget);
     expect(find.textContaining('无法删除节目，请稍后重试。'), findsOneWidget);
   });
-
-  testWidgets('刷新列表失败时会进入错误态', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      TvShowNavApp(
-        linkStore: MemoryLinkStore(
-          failGetLinksAfterAdd: true,
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('设置'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('添加节目'));
-    await tester.pumpAndSettle();
-
-    await tester.enterText(find.byType(TextBox).at(0), '新闻频道');
-    await tester.enterText(
-      find.byType(TextBox).at(1),
-      'https://example.com/live',
-    );
-    await tester.tap(find.text('添加'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('添加失败'), findsOneWidget);
-    await tester.tap(find.text('确定'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('节目列表加载失败'), findsOneWidget);
-    expect(find.text('重新加载'), findsOneWidget);
-  });
 }
 
 class MemoryLinkStore implements LinkStore {
@@ -173,17 +184,15 @@ class MemoryLinkStore implements LinkStore {
     this.failDelete = false,
     this.failUpdate = false,
     this.failInitializeCount = 0,
-    this.failGetLinksAfterAdd = false,
   }) : _links = List<TvLink>.from(initialLinks ?? []);
 
   final List<TvLink> _links;
   final bool failAdd;
   final bool failDelete;
   final bool failUpdate;
-  final bool failGetLinksAfterAdd;
   int failInitializeCount;
-  bool _shouldFailGetLinks = false;
   int _nextId = 1;
+  int getLinksCallCount = 0;
 
   @override
   Future<void> initialize() async {
@@ -202,10 +211,7 @@ class MemoryLinkStore implements LinkStore {
 
   @override
   Future<List<TvLink>> getLinks() async {
-    if (_shouldFailGetLinks) {
-      throw Exception('读取列表失败');
-    }
-
+    getLinksCallCount += 1;
     return List<TvLink>.from(_links);
   }
 
@@ -220,9 +226,6 @@ class MemoryLinkStore implements LinkStore {
 
     final link = TvLink(id: _nextId++, name: name, url: url);
     _links.add(link);
-    if (failGetLinksAfterAdd) {
-      _shouldFailGetLinks = true;
-    }
     return link;
   }
 

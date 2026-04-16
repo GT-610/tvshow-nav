@@ -3,11 +3,23 @@ class TvLink {
   final String name;
   final String url;
 
-  TvLink({
+  const TvLink({
     this.id,
     required this.name,
     required this.url,
   });
+
+  TvLink copyWith({
+    int? id,
+    String? name,
+    String? url,
+  }) {
+    return TvLink(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      url: url ?? this.url,
+    );
+  }
 
   Map<String, dynamic> toMap() {
     final map = <String, dynamic>{

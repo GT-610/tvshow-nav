@@ -59,8 +59,9 @@ class LinkController extends ChangeNotifier {
     required String name,
     required String url,
   }) async {
-    await _linkStore.addLink(name: name, url: url);
-    await loadLinks();
+    final link = await _linkStore.addLink(name: name, url: url);
+    _links = [..._links, link];
+    notifyListeners();
   }
 
   Future<void> updateLink({
@@ -69,12 +70,28 @@ class LinkController extends ChangeNotifier {
     required String url,
   }) async {
     await _linkStore.updateLink(id: id, name: name, url: url);
-    await loadLinks();
+    final index = _links.indexWhere((item) => item.id == id);
+    if (index == -1) {
+      await loadLinks();
+      return;
+    }
+
+    final updatedLinks = List<TvLink>.from(_links);
+    updatedLinks[index] = updatedLinks[index].copyWith(name: name, url: url);
+    _links = updatedLinks;
+    notifyListeners();
   }
 
   Future<void> deleteLink(int id) async {
     await _linkStore.deleteLink(id);
-    await loadLinks();
+    final nextLinks = _links.where((item) => item.id != id).toList();
+    if (nextLinks.length == _links.length) {
+      await loadLinks();
+      return;
+    }
+
+    _links = nextLinks;
+    notifyListeners();
   }
 
   void _setLoadingState() {

@@ -75,6 +75,8 @@ class ManagePage extends StatelessWidget {
                             itemBuilder: (context, index) {
                               final link = links[index];
                               return LinkCard(
+                                key: ValueKey(
+                                    link.id ?? '${link.name}:${link.url}'),
                                 link: link,
                                 onEdit: link.id != null
                                     ? () => onEdit(link.id!)

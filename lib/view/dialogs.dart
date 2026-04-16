@@ -24,7 +24,7 @@ Future<void> showLinkEditorDialog(
     builder: (dialogContext) {
       return ContentDialog(
         title: Text(editingId == null ? '添加新节目' : '编辑节目'),
-        content: const LinkForm(),
+        content: LinkForm(key: ValueKey(editingId ?? 'new')),
         actions: [
           FilledButton(
             onPressed: () => _submitLink(dialogContext),

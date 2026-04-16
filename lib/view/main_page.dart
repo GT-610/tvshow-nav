@@ -77,7 +77,9 @@ class _HomePaneBody extends StatelessWidget {
     final linkController = context.watch<LinkController>();
     return HomePage(
       links: linkController.links,
-      isLoading: linkController.isLoading,
+      loadState: linkController.loadState,
+      errorMessage: linkController.errorMessage,
+      onRetry: () => context.read<LinkController>().retryInitialize(),
     );
   }
 }
@@ -90,10 +92,12 @@ class _ManagePaneBody extends StatelessWidget {
     final linkController = context.watch<LinkController>();
     return ManagePage(
       links: linkController.links,
-      isLoading: linkController.isLoading,
+      loadState: linkController.loadState,
+      errorMessage: linkController.errorMessage,
       onAdd: () => showLinkEditorDialog(context),
       onEdit: (id) => showLinkEditorDialog(context, editingId: id),
       onDelete: (id) => showDeleteDialog(context, id),
+      onRetry: () => context.read<LinkController>().retryInitialize(),
     );
   }
 }

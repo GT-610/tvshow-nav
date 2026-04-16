@@ -24,26 +24,10 @@ class _LinkFormState extends State<LinkForm> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final formController = context.read<LinkFormController>();
-    _syncController(_nameController, formController.name);
-    _syncController(_urlController, formController.url);
-  }
-
-  @override
   void dispose() {
     _nameController.dispose();
     _urlController.dispose();
     super.dispose();
-  }
-
-  void _syncController(TextEditingController controller, String value) {
-    if (controller.text == value) return;
-    controller.value = TextEditingValue(
-      text: value,
-      selection: TextSelection.collapsed(offset: value.length),
-    );
   }
 
   @override

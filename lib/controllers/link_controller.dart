@@ -48,10 +48,10 @@ class LinkController extends ChangeNotifier {
     } catch (error) {
       _setErrorState(_buildLoadErrorMessage(error));
       rethrow;
-    }
-
-    if (notify) {
-      notifyListeners();
+    } finally {
+      if (notify) {
+        notifyListeners();
+      }
     }
   }
 

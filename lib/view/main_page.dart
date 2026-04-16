@@ -57,7 +57,9 @@ class MainPage extends StatelessWidget {
             title: const Text('首页'),
             body: HomePage(
               links: linkController.links,
-              isLoading: linkController.isLoading,
+              loadState: linkController.loadState,
+              errorMessage: linkController.errorMessage,
+              onRetry: () => context.read<LinkController>().retryInitialize(),
             ),
           ),
           PaneItem(
@@ -65,10 +67,12 @@ class MainPage extends StatelessWidget {
             title: const Text('设置'),
             body: ManagePage(
               links: linkController.links,
-              isLoading: linkController.isLoading,
+              loadState: linkController.loadState,
+              errorMessage: linkController.errorMessage,
               onAdd: () => showLinkEditorDialog(context),
               onEdit: (id) => showLinkEditorDialog(context, editingId: id),
               onDelete: (id) => showDeleteDialog(context, id),
+              onRetry: () => context.read<LinkController>().retryInitialize(),
             ),
           ),
         ],

@@ -1,22 +1,42 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:tvshow_nav/controllers/link_controller.dart';
 import 'package:tvshow_nav/models/link.dart';
 import 'package:tvshow_nav/components/link_card.dart';
 import 'package:tvshow_nav/components/empty_state.dart';
 
 class HomePage extends StatelessWidget {
   final List<TvLink> links;
-  final bool isLoading;
+  final LinkLoadState loadState;
+  final String? errorMessage;
+  final VoidCallback onRetry;
 
   const HomePage({
     super.key,
     required this.links,
-    required this.isLoading,
+    required this.loadState,
+    required this.errorMessage,
+    required this.onRetry,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
+    if (loadState == LinkLoadState.loading) {
       return const Center(child: ProgressRing());
+    }
+
+    if (loadState == LinkLoadState.error) {
+      return Padding(
+        padding: const EdgeInsets.all(16),
+        child: EmptyState(
+          icon: WindowsIcons.error,
+          title: '节目列表加载失败',
+          subtitle: errorMessage ?? '请稍后重试。',
+          action: FilledButton(
+            onPressed: onRetry,
+            child: const Text('重新加载'),
+          ),
+        ),
+      );
     }
 
     return Padding(

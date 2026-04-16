@@ -5,14 +5,20 @@ import 'package:tvshow_nav/components/empty_state.dart';
 
 class HomePage extends StatelessWidget {
   final List<TvLink> links;
+  final bool isLoading;
 
   const HomePage({
     super.key,
     required this.links,
+    required this.isLoading,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Center(child: ProgressRing());
+    }
+
     return Padding(
       padding: const EdgeInsets.all(16),
       child: links.isEmpty

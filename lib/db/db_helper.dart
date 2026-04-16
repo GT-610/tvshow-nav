@@ -42,9 +42,9 @@ class DbHelper {
   Future<void> initDatabase() async {
     await _initDatabaseFactory();
     await _ensureDataDir();
+    if (_database != null) return;
     final path = getDbPath();
-    if (await File(path).exists()) return;
-    await openDatabase(
+    _database = await openDatabase(
       path,
       version: 1,
       onCreate: _onCreateDb,
@@ -58,6 +58,7 @@ class DbHelper {
     final path = getDbPath();
     if (!await File(path).exists()) {
       await initDatabase();
+      return _database!;
     }
     _database = await openDatabase(
       path,
@@ -117,6 +118,7 @@ class DbHelper {
   Future<void> close() async {
     if (_database != null) {
       await _database!.close();
+      _database = null;
     }
   }
 }

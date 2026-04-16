@@ -66,6 +66,44 @@ void main() {
 
     expect(find.text('直播链接格式无效，请先在设置里检查这个节目的地址。'), findsOneWidget);
   });
+
+  testWidgets('增删改不会触发额外整表刷新', (WidgetTester tester) async {
+    final store = MemoryLinkStore();
+    await tester.pumpWidget(TvShowNavApp(linkStore: store));
+    await tester.pumpAndSettle();
+
+    expect(store.getLinksCallCount, 1);
+
+    await tester.tap(find.text('设置'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('添加节目'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextBox).at(0), '新闻频道');
+    await tester.enterText(
+      find.byType(TextBox).at(1),
+      'https://example.com/live',
+    );
+    await tester.tap(find.text('添加'));
+    await tester.pumpAndSettle();
+
+    expect(store.getLinksCallCount, 1);
+
+    await tester.tap(find.byIcon(WindowsIcons.edit));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextBox).at(0), '央视新闻');
+    await tester.tap(find.text('更新'));
+    await tester.pumpAndSettle();
+
+    expect(store.getLinksCallCount, 1);
+
+    await tester.tap(find.byIcon(WindowsIcons.delete));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('删除'));
+    await tester.pumpAndSettle();
+
+    expect(store.getLinksCallCount, 1);
+  });
 }
 
 class MemoryLinkStore implements LinkStore {
@@ -74,6 +112,7 @@ class MemoryLinkStore implements LinkStore {
 
   final List<TvLink> _links;
   int _nextId = 1;
+  int getLinksCallCount = 0;
 
   @override
   Future<void> initialize() async {
@@ -87,6 +126,7 @@ class MemoryLinkStore implements LinkStore {
 
   @override
   Future<List<TvLink>> getLinks() async {
+    getLinksCallCount += 1;
     return List<TvLink>.from(_links);
   }
 

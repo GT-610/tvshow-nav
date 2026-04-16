@@ -32,6 +32,7 @@ class HomePage extends StatelessWidget {
               itemBuilder: (context, index) {
                 final link = links[index];
                 return LinkCard(
+                  key: ValueKey(link.id ?? '${link.name}:${link.url}'),
                   link: link,
                   onEdit: null,
                   onDelete: null,

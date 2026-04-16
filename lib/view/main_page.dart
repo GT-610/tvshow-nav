@@ -14,8 +14,9 @@ class MainPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appTheme = context.watch<AppTheme>();
-    final navigationController = context.watch<NavigationController>();
-    final linkController = context.watch<LinkController>();
+    final selectedIndex = context.select<NavigationController, int>(
+      (value) => value.selectedIndex,
+    );
     final theme = FluentTheme.of(context);
 
     return NavigationView(
@@ -49,30 +50,50 @@ class MainPage extends StatelessWidget {
       ),
       pane: NavigationPane(
         displayMode: PaneDisplayMode.top,
-        selected: navigationController.selectedIndex,
-        onChanged: navigationController.setSelectedIndex,
+        selected: selectedIndex,
+        onChanged: context.read<NavigationController>().setSelectedIndex,
         items: [
           PaneItem(
             icon: const Icon(WindowsIcons.home),
             title: const Text('首页'),
-            body: HomePage(
-              links: linkController.links,
-              isLoading: linkController.isLoading,
-            ),
+            body: const _HomePaneBody(),
           ),
           PaneItem(
             icon: const Icon(WindowsIcons.settings),
             title: const Text('设置'),
-            body: ManagePage(
-              links: linkController.links,
-              isLoading: linkController.isLoading,
-              onAdd: () => showLinkEditorDialog(context),
-              onEdit: (id) => showLinkEditorDialog(context, editingId: id),
-              onDelete: (id) => showDeleteDialog(context, id),
-            ),
+            body: const _ManagePaneBody(),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _HomePaneBody extends StatelessWidget {
+  const _HomePaneBody();
+
+  @override
+  Widget build(BuildContext context) {
+    final linkController = context.watch<LinkController>();
+    return HomePage(
+      links: linkController.links,
+      isLoading: linkController.isLoading,
+    );
+  }
+}
+
+class _ManagePaneBody extends StatelessWidget {
+  const _ManagePaneBody();
+
+  @override
+  Widget build(BuildContext context) {
+    final linkController = context.watch<LinkController>();
+    return ManagePage(
+      links: linkController.links,
+      isLoading: linkController.isLoading,
+      onAdd: () => showLinkEditorDialog(context),
+      onEdit: (id) => showLinkEditorDialog(context, editingId: id),
+      onDelete: (id) => showDeleteDialog(context, id),
     );
   }
 }
